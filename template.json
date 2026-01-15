@@ -1,0 +1,15 @@
+{
+  "name": "expo-nativewind-template",
+  "description": "Expo + NativeWind + Tailwind starter template",
+  "files": [
+    "app",
+    "assets",
+    "babel.config.js",
+    "metro.config.js",
+    "tailwind.config.js",
+    "global.css",
+    "nativewind-env.d.ts",
+    "app.json",
+    "package.json"
+  ]
+}
