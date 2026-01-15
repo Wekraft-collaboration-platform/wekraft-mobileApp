@@ -4,7 +4,7 @@ import { View, Text } from 'react-native';
 const index = () => {
   return (
     <View className="flex-1 justify-center items-center">
-      <Text className="text-6xl text-red-200">index hello </Text>
+      <Text className="text-black">Hello World</Text>
     </View>
   );
 };
