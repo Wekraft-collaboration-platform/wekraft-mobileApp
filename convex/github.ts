@@ -1,13 +1,13 @@
 // // convex/github.ts
 "use node";
-
-import { getGithubAccessToken } from "./githubHelpers";
+// 
+// import { getGithubAccessToken } from "./githubHelpers";/
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 import { Octokit } from "octokit";
-import { fetchUserContributionsRaw } from "./githubHelpers";
-  
+import { getGithubAccessToken } from "./githubHelper";
+import { fetchUserContributionsRaw } from "./githubHelper";
 
 
 

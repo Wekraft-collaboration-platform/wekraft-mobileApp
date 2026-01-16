@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "WeKraft Mobile",
-    "slug": "wekraft mobile",
+    "name": "WeKraft-Mobile",
+    "slug": "wekraft-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/we_kraft_icon.png",
@@ -38,7 +38,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
