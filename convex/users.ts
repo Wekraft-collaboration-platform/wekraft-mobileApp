@@ -47,77 +47,7 @@ export const store = mutation({
       throw new Error("Called storeUser without authentication present");
     }
 
-    // This guarantees:
-    // ❌ Mutation cannot run without Convex auth
-    // ✅ Clerk → Convex token bridge is required
-
-    // console.log("identity from clerk ", identity);
-    // Find user by tokenIdentifier
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
-      )
-      .unique();
-
-    // If user already exists
-    if (user) {
-      const updates: Partial<typeof user> = {};
-
-      if (user.name !== identity.name && identity.name) {
-        updates.name = identity.name;
-      }
-
-      if (Object.keys(updates).length > 0) {
-        updates.updatedAt = Date.now();
-        await ctx.db.patch(user._id, updates);
-      }
-
-      return user._id;
-    }
-
-
-    // const token = await getGithubAccessToken(identity.subject);
-
-    // Create new user
-    return await ctx.db.insert("users", {
-      name: identity.name ?? "Anonymous",
-      tokenIdentifier: identity.tokenIdentifier,
-      email: identity.email ?? "",
-      imageUrl: identity.pictureUrl ?? undefined,
-
-      hasCompletedOnboarding: false,
-
-      githubUsername: identity.nickname ?? undefined,
-      githubAccessToken: undefined, // will be set later after OAuth
-      last_sign_in:
-        typeof identity.user_last_sign_in === "number"
-          ? identity.user_last_sign_in
-          : undefined,
-      inviteLink: undefined,
-      // DEFAULT PLAN
-      type: "free",
-      limit: 2,
-
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    }
-    );
-
-
-    console.log("User asucceffuky enterd in db")
-
-  },
-});
-
-export const storeUserMobile = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity) {
-      throw new Error("Called storeUser without authentication present");
-    }
+    console.log("identity from clerk ", identity)
 
     // This guarantees:
     // ❌ Mutation cannot run without Convex auth
@@ -147,9 +77,6 @@ export const storeUserMobile = mutation({
 
       return user._id;
     }
-
-
-    // const token = await getGithubAccessToken(identity.subject);
 
     // Create new user
     return await ctx.db.insert("users", {
@@ -179,10 +106,9 @@ export const storeUserMobile = mutation({
     );
 
 
-    console.log("User asucceffuky enterd in db")
-
   },
 });
+
 
 // =========================================
 // GET CURRENT USER
@@ -192,6 +118,8 @@ export const storeUserMobile = mutation({
 // ✔ Backend-only
 // ✔ Reusable by mutations / checks
 // Not exposed to the browser
+
+
 export const getCurrentUser = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
