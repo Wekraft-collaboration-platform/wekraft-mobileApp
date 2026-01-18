@@ -9,6 +9,53 @@ import { Octokit } from "octokit";
 import { getGithubAccessToken } from "./githubHelper";
 import { fetchUserContributionsRaw } from "./githubHelper";
 
+type GithubOwner = {
+  login: string;
+  avatar_url: string;
+  html_url: string;
+};
+
+type GithubRepoRaw = {
+  id: number;
+  name: string;
+  full_name: string;
+  private: boolean;
+  html_url: string;
+  owner: GithubOwner;
+  created_at: string;
+  updated_at: string;
+  pushed_at: string;
+};
+
+type GithubRepo = {
+  
+  id: number;
+  name: string;
+  full_name: string;
+  private: boolean;
+  html_url: string;
+  ownerLogin: string;
+  ownerAvatar: string;
+  created_at: string;
+  updated_at: string;
+  pushed_at: string;
+ 
+};
+
+
+type GithubCollaborator = {
+  id: number;
+  login: string;
+  avatar_url: string;
+  html_url: string;
+  permissions?: {
+    admin: boolean;
+    push: boolean;
+    pull: boolean;
+  };
+};
+
+
 
 
 async function ensureGithubToken(ctx: any): Promise<string> {
@@ -42,43 +89,6 @@ async function ensureGithubToken(ctx: any): Promise<string> {
 
 
 
-type GithubOwner = {
-  login: string;
-  avatar_url: string;
-  html_url: string;
-};
-
-
-
-type GithubRepoRaw = {
-  id: number;
-  name: string;
-  full_name: string;
-  private: boolean;
-  html_url: string;
-  owner: GithubOwner;
-  created_at: string;
-  updated_at: string;
-  pushed_at: string;
-  // description: string | null;
-};
-
-
-type GithubRepo = {
-  id: number;
-  name: string;
-  full_name: string;
-  private: boolean;
-  html_url: string;
-  ownerLogin: string;
-  ownerAvatar: string;
-  created_at: string;
-  updated_at: string;
-  pushed_at: string;
-  // description: string | null;
-
- 
-};
 
 export const fetchGithubRepos = action({
   args: {},
@@ -225,19 +235,6 @@ export const getProjectHealthData = action({
 
   },
 });
-
-
-type GithubCollaborator = {
-  id: number;
-  login: string;
-  avatar_url: string;
-  html_url: string;
-  permissions?: {
-    admin: boolean;
-    push: boolean;
-    pull: boolean;
-  };
-};
 
 
 
