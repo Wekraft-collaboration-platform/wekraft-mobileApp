@@ -2,11 +2,65 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } fr
 import React, { useState } from 'react'
 import LinearBackgroundPovider from '@/providers/LinearBackgroundPovider'
 import { Ionicons } from "@expo/vector-icons"
+import { useSSO } from '@clerk/clerk-expo'
+import { useQueryClient } from '@tanstack/react-query'
+import { useAuthTransition,setAuthTransitionState } from '@/queries/auth/useAuthTransition'
+
 
 const Index = () => {
 
+  const {data : authTransitionState} = useAuthTransition()
+  const queryClient = useQueryClient()
 
-  const [loading, setLoading] = useState(false)
+  const {startSSOFlow} = useSSO()
+
+  /**
+   * Initiates GitHub OAuth login flow.
+   * 
+   * Key constraints:
+   * - Prevents duplicate SSO requests
+   * - Persists "in-progress" state to survive redirects
+   * - Resets state on failure
+   */
+  const handleGithubSignIn = async ()=>{
+
+    // Hard guard: do nothing if user is already authenticated
+    // or an SSO flow is already running
+
+    if(authTransitionState === "authenticated" || authTransitionState === "sso_in_progress") return
+    try{
+      
+      // Persist SSO start state immediately
+      // This prevents UI reset when Clerk redirects to OAuth callback
+      setAuthTransitionState(queryClient,"sso_in_progress")
+      console.log("Set to `sso_in_progress`")
+
+      const {createdSessionId,setActive} = await startSSOFlow({
+        strategy:"oauth_github"
+      })
+
+      if(!createdSessionId || !setActive){
+        throw new Error("Github OAuth Failed")
+      }
+
+      await setActive({session : createdSessionId})
+
+
+      // Login Succefully set teh authTransisiton to Authenticated
+      setAuthTransitionState(queryClient,"authenticated")
+      console.log("Set to `authenticated`")
+    }catch(err){
+      // On any failure, reset auth transition back to idle
+      // This allows the user to retry login cleanly
+      setAuthTransitionState(queryClient,"idle")
+      console.log("Set to `idle`")
+      console.log("LoginScreen/handleGithubSignIn : ",err)
+    }
+  }
+
+
+
+  // Login Screen UI
   return (
     <LinearBackgroundPovider>
       <View className='flex-1'>
@@ -28,9 +82,6 @@ const Index = () => {
         </View>
 
 
-
-
-
       </View>
 
       
@@ -40,16 +91,20 @@ const Index = () => {
         <View style={style.divder} />
         <Text style={style.authLabel}>AUTHENTICATION</Text>
 
+            {/* Github SignIn Buttons */}
         <TouchableOpacity
           onPress={() => {
-
+            console.log("bUTTON pRESS")
+            // if(loading) return
+            if(authTransitionState ==="sso_in_progress") return
+            // setLoading(true)
+            handleGithubSignIn()
           }}
           style={style.githubButton}
-
           activeOpacity={0.7}
         >
 
-          {loading ? (
+          {authTransitionState==="sso_in_progress" ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <>
@@ -60,6 +115,9 @@ const Index = () => {
           )}
 
         </TouchableOpacity>
+       
+
+       {/* Terms ANd Condition */}
         <Text style={style.terms}>By continuing you agree to our{"\n"}
           <Text style={style.termsText} >
             Terms of Service.
@@ -67,13 +125,25 @@ const Index = () => {
         </Text>
 
 
+      {/* 
+        FULL-SCREEN LOADING OVERLAY
+        Ensures user cannot interact during OAuth redirect phase.
+      */}
       </View>
+          {authTransitionState==="sso_in_progress" && (
+            <View style={style.LoadingForeGround}>
+              <ActivityIndicator size={"large"} color={"white"}/>
+              </View>
+          )}
     </LinearBackgroundPovider>
   )
 }
 
 export default Index
 
+
+
+// STyle Sheet
 const style = StyleSheet.create({
   header: {
     marginTop: 70
@@ -90,6 +160,18 @@ const style = StyleSheet.create({
     color: "white",
     lineHeight: 76,
     // marginBottom:20,
+  },
+
+  LoadingForeGround:{
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
   },
   footer: {
     marginBottom: 50,
