@@ -107,15 +107,15 @@ const Index = () => {
       {/* Footer Section */}
       <TouchableOpacity 
       onPress={()=>{
-        if(!data.countryCode || !data.occupation  || !data.phoneNumber || data.phoneNumber.length !== 10){
-          return (Toast.show({
-            type:"error",
-            text1:"Invalid Input",
-            text2:"Please enter the input",
-            visibilityTime:2000,
-            position:"bottom"
-          }))
-        }
+        // if(!data.countryCode || !data.occupation  || !data.phoneNumber || data.phoneNumber.length !== 10){
+        //   return (Toast.show({
+        //     type:"error",
+        //     text1:"Invalid Input",
+        //     text2:"Please enter the input",
+        //     visibilityTime:2000,
+        //     position:"bottom"
+        //   }))
+        // }
 
         console.log("Identity Setup Complete Next Page routing")
         router.push("/(onboarding)/selectRepo")
