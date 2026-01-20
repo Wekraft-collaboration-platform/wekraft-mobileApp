@@ -193,13 +193,21 @@ const selectRepo = () => {
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => {
                         const isSelected = data.selctedrepo?.id === item.id
+                        
 
                         return (
                             <TouchableOpacity
                                 onPress={() => {
+                                    if(isSelected){
+                                        return
+                                    }
                                     setData((prev) => ({
                                         ...prev,
-                                        selctedrepo: item
+                                        selctedrepo: item,
+                                        projectdescription:"",
+                                        thumbnailUrl:undefined,
+                                        projectName:item.name,
+                                        tags:[],
                                     }))
                                 }}
                                 style={[styles.repoCard, isSelected && styles.repoCardSelected]}
@@ -241,19 +249,30 @@ const selectRepo = () => {
 
             {/* CTA */}
             <TouchableOpacity
-                style={styles.cta}
-                disabled={!data.selctedrepo?.id}
-                onPress={() => router.push("/(onboarding)/defineProject")}
+                style={[styles.cta, !data.selctedrepo?.id ?{backgroundColor:"rgba(80, 80, 80, 1)"}:{} ]}
+                // disabled={!data.selctedrepo?.id}
+                onPress={() =>{
+                    if(!data.selctedrepo?.id){
+                        return(
+                            Toast.show({
+                                type:"error",
+                                text1:"Invalid",
+                                text2:"Selecte the repo first",
+                                position:"bottom",
+                                visibilityTime:1500
+                            })
+                        )
+                    }
+                    
+                    
+                    router.push("/(onboarding)/defineProject")}
+                
+                }
             >
                 <Text style={styles.ctaText}>
                     Import Selected {data.selctedrepo?.id ? "1" : ""}
                 </Text>
             </TouchableOpacity>
-
-
-
-
-
 
         </View>
 

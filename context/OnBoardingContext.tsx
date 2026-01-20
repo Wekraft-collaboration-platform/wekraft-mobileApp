@@ -8,7 +8,7 @@ type onboardingProp = {
     countryCode: string
     tags: string[]
     isPublic: boolean
-    thumbnailUrl: String | undefined
+    thumbnailUrl: string | undefined
     projectName: string
     projectdescription: string
     repos: GithubRepo[]

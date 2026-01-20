@@ -9,6 +9,7 @@ export const FetchRepoByPage =(page : number)=>{
         queryKey : ["RepoStories",page],
         queryFn: ()=>  getRepoStories({page}),
         staleTime : 1000*60*30,
+        gcTime : 1000*60*30,
         enabled : Boolean(page > 0),
         retry : 1
         }

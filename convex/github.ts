@@ -114,10 +114,11 @@ export const getRepositories = action({
     page:v.number(),
   },
   handler : async(ctx,args):Promise< GithubRepo[]> =>{
-    const identity = ctx.auth.getUserIdentity()
+    const identity = await ctx.auth.getUserIdentity()
     if(!identity) {
       throw new Error("Called getRepositories without authentication present");
     }
+
 
     const token = await ensureGithubToken(ctx)
 
@@ -164,13 +165,13 @@ export const getRepositoriesBySearch = action({
     searchQuery:v.string(),
   },
   handler : async(ctx,args):Promise< GithubRepo[]> =>{
-    const identity = ctx.auth.getUserIdentity()
+    const identity = await ctx.auth.getUserIdentity()
     if(!identity) {
       throw new Error("Called getRepositories without authentication present");
     }
 
     const token = await ensureGithubToken(ctx)
-    console.log(identity.nickname)
+    console.log(identity)
 
     const octokit = new Octokit({ auth: token });
     const repos : GithubRepo[] = []
