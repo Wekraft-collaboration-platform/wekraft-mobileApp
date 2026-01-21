@@ -304,8 +304,8 @@ export default DefineProject
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 16,
-        paddingTop: 24,
+        paddingHorizontal: 24,
+        paddingTop: 48,
     },
     scrollContent: {
         // padding: 20,

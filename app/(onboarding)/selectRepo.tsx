@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList,ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { FetchRepoByPage } from "@/queries/repo/repositoriesFetchingPerPage"
 import { Ionicons } from '@expo/vector-icons'
@@ -7,6 +7,8 @@ import { useOnboarding } from '@/context/OnBoardingContext'
 import { formatRelativeTime } from '@/components/Helper/helper'
 import FetchingRepoSkeleton from "@/components/SkeletonLayout/FetchingRepoSkeleton";
 import Toast from 'react-native-toast-message'
+import { useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 
 const selectRepo = () => {
     const [page, setPage] = useState(1)
@@ -16,6 +18,8 @@ const selectRepo = () => {
     const { data, setData } = useOnboarding()
     const [lastPage, setLastPage] = useState<number>(-1)
     const listRef = React.useRef<FlatList<any>>(null)
+    const updateUser = useMutation(api.users.updateUser)
+    const [settingUp, setSettingUp] = useState(false)
 
     const {
         data: Repos,
@@ -56,6 +60,8 @@ const selectRepo = () => {
 
 
     //   Loding View
+
+
     return (
 
         <View style={styles.container}>
@@ -84,6 +90,9 @@ const selectRepo = () => {
             </View>
 
             {/* Search */}
+          
+
+           
             <View style={[styles.input, { flexDirection: "row", gap: 10, alignItems: "center", marginVertical: 20 }]}>
 
                 <Ionicons name="search" size={24} color="white" />
@@ -99,9 +108,10 @@ const selectRepo = () => {
                     style={{ color: "white", flex: 1 }}
                 />
             </View>
-
+        
 
             {/* Pagination */}
+            {(isLoading || Repos) && (
             <View style={styles.paginationContainer}>
                 <TouchableOpacity
                     disabled={isLoading}
@@ -167,6 +177,7 @@ const selectRepo = () => {
                     />
                 </TouchableOpacity>
             </View>
+            )}
 
 
 
@@ -179,6 +190,8 @@ const selectRepo = () => {
                     <FetchingRepoSkeleton />
                 </>
             ) : <>
+
+                {Repos ?(
 
                 <FlatList
                     data={Repos}
@@ -242,12 +255,55 @@ const selectRepo = () => {
 
 
                 />
+                ):(
+                    <>
+                    {/* An Empty Screen if No repos are present in the Github To Skip this Process  */}
+
+                    <View className='flex-1 justify-center items-center'>
+                        <Ionicons name='logo-github' size={48} color="white" />
+                        <Text style={styles.headerText2}>No repositories found</Text>
+                        <Text style={[styles.headerText, { fontSize: 16, marginTop: 5, textAlign: "left" }]}>
+                            You have no repositories to connect.
+                        </Text>
+                    </View>
+
+                    <TouchableOpacity
+                    style={styles.cta}
+                    onPress={async ()=>{
+                        if(settingUp){
+                            return
+                        }
+                        setSettingUp(true)
+                        try{
+                            await updateUser({
+                                occupation:data.occupation,
+                                phoneNumber:data.phoneNumber,
+                                countryCode:data.countryCode,
+                                onboardingCompleted:true,
+                            })
+                            setSettingUp(false)
+                        }catch(err){
+                            setSettingUp(false)
+                            console.log(err)
+                        }
+                        
+                    }}
+                    >
+                    <Text style={styles.ctaText}>
+                        Skip 
+                        </Text>                        
+                    </TouchableOpacity>
+                    </>
+                )}
+
             </>
 
             }
 
 
             {/* CTA */}
+            {Repos && (
+
             <TouchableOpacity
                 style={[styles.cta, !data.selctedrepo?.id ?{backgroundColor:"rgba(80, 80, 80, 1)"}:{} ]}
                 // disabled={!data.selctedrepo?.id}
@@ -273,7 +329,16 @@ const selectRepo = () => {
                     Import Selected {data.selctedrepo?.id ? "1" : ""}
                 </Text>
             </TouchableOpacity>
+            )}
 
+
+
+            {settingUp && (
+                   <View style={styles.LoadingForeGround}>
+                     <ActivityIndicator size={"large"} color={"white"} />
+                     <Text style={styles.LoadingText}>Setting up your project...</Text>
+                   </View>
+                 )}
         </View>
 
 
@@ -284,9 +349,12 @@ export default selectRepo
 
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
+    
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 48,
+  },
 
     headerText: {
         fontSize: 24,
@@ -420,6 +488,20 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
 
+    LoadingForeGround: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
+  },
+
+  LoadingText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+    marginTop: 16,
+  }
 
 
 })

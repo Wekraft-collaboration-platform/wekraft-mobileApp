@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput,ActivityIndicator } from 'react-native'
 import React from 'react'
 import { useUser } from '@clerk/clerk-expo'
 import { Ionicons } from '@expo/vector-icons'
@@ -134,9 +134,10 @@ const Index = () => {
           <Ionicons name='arrow-forward' size={24} color='black' />
         </View>
       </TouchableOpacity>
-    </View>
-  )
 
+    </View>
+    )
+  
 }
 
 export default Index
@@ -145,6 +146,8 @@ export default Index
 const style = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 48,
   },
   headerContainer: {
     flex: 1,

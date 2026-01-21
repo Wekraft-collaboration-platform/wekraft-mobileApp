@@ -187,8 +187,6 @@ const Invite = () => {
       </TouchableOpacity>
 
 
-      {/* <SetupLoadingScreen visible={settingUp} /> */}
-
       {settingUp && (
         <View style={styles.LoadingForeGround}>
           <ActivityIndicator size={"large"} color={"white"} />
@@ -206,6 +204,8 @@ export default Invite
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 48,
   },
 
   header: {
