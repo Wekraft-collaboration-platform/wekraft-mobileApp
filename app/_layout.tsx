@@ -84,16 +84,15 @@ function AuthGate() {
 
 
   // Route to onborading when the user is signed-in but not completed the onBorading
-  if (isSignedIn && !user?.hasCompletedOnboarding) {
+  if (!user?.hasCompletedOnboarding) {
     console.log("Route to onborading when the user is signed-in but not completed the onBorading")
-    console.log("Set to `authenticated`")
+    // console.log("Set to `authenticated`")
     // setAuthTransitionState(transitionQueryClient,"authenticated")
     return <Redirect href="/(onboarding)" />
   }
 
   // Route to the main screen when the user is signedit and completed onBorading
   console.log("Route to the main screen when the user is signedit and completed onBorading")
-  console.log("Set to `authenticated`")
   // setAuthTransitionState(transitionQueryClient,"authenticated")
   return <Redirect href="/(tabs)" />
 

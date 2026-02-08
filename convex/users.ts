@@ -118,8 +118,6 @@ export const store = mutation({
 // ✔ Backend-only
 // ✔ Reusable by mutations / checks
 // Not exposed to the browser
-
-
 export const getCurrentUser = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -223,6 +221,41 @@ export const completeOnboarding = mutation({
   },
 });
 
+
+export const updateUser = mutation({
+  args:{
+    bio:v.optional(v.string()),
+    occupation:v.optional(v.string()),
+    phoneNumber:v.optional(v.string()),
+    countryCode : v.optional(v.string()),
+    onboardingCompleted:v.optional(v.boolean()),
+  },
+  handler : async (ctx,args)=>{
+    const identity = await ctx.auth.getUserIdentity()
+    if(!identity){
+      throw new Error("Called updateUser without authentication present")
+    }
+
+    const user = await ctx.db
+      .query("users")
+         .withIndex("by_token", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .unique();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    await ctx.db.patch(user._id, {
+      bio:args.bio??"",
+      occupation:args.occupation??"",
+      phoneNumber:args.phoneNumber??"",
+      countryCode:args.countryCode??"",
+      hasCompletedOnboarding:args.onboardingCompleted??false,
+    });
+  }
+})
 
 
 // =========================================

@@ -47,8 +47,8 @@ const Index = () => {
 
 
       // Login Succefully set teh authTransisiton to Authenticated
-      setAuthTransitionState(queryClient,"authenticated")
       console.log("Set to `authenticated`")
+      setAuthTransitionState(queryClient,"authenticated")
     }catch(err){
       // On any failure, reset auth transition back to idle
       // This allows the user to retry login cleanly
