@@ -1,5 +1,4 @@
 export  const colors = {
-    LoginScreenGraidentStart: "#17171a",
-    LoginScreenGraidentMiddle: "#0a0a0c",
-    LoginScreenGraidentEnd: "#09090b",
+    LoginScreenGraidentStart: "#1D2739",
+    LoginScreenGraidentEnd: "#0A0B0C",
 }

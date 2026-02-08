@@ -8,6 +8,54 @@ import { api } from "./_generated/api";
 import { Octokit } from "octokit";
 import { getGithubAccessToken } from "./githubHelper";
 import { fetchUserContributionsRaw } from "./githubHelper";
+import {ctx} from "expo-router/_ctx";
+
+type GithubOwner = {
+  login: string;
+  avatar_url: string;
+  html_url: string;
+};
+
+type GithubRepoRaw = {
+  id: number;
+  name: string;
+  full_name: string;
+  private: boolean;
+  html_url: string;
+  owner: GithubOwner;
+  created_at: string;
+  updated_at: string;
+  pushed_at: string;
+};
+
+type GithubRepo = {
+  
+  id: number;
+  name: string;
+  full_name: string;
+  private: boolean;
+  html_url: string;
+  ownerLogin: string;
+  ownerAvatar: string;
+  created_at: string;
+  updated_at: string;
+  pushed_at: string;
+ 
+};
+
+
+type GithubCollaborator = {
+  id: number;
+  login: string;
+  avatar_url: string;
+  html_url: string;
+  permissions?: {
+    admin: boolean;
+    push: boolean;
+    pull: boolean;
+  };
+};
+
 
 
 
@@ -40,49 +88,139 @@ async function ensureGithubToken(ctx: any): Promise<string> {
 }
 
 
+// export const getRepositories = async (
+//     page: number = 1,
+//     perPage: number = 10
+// ) => {
+//
+//
+//   const token = await ensureGithubToken(page);
+//
+//   const octokit = new Octokit({ auth: token });
+//
+//   const { data } = await octokit.rest.repos.listForAuthenticatedUser({
+//     sort: "updated",
+//     direction: "desc",
+//     visibility: "all",
+//     page: page,
+//     per_page: perPage,
+//   });
+//
+//   return data;
+// };
+
+export const getRepositories = action({
+  args: {
+    page:v.number(),
+  },
+  handler : async(ctx,args):Promise< GithubRepo[]> =>{
+    const identity = await ctx.auth.getUserIdentity()
+    if(!identity) {
+      throw new Error("Called getRepositories without authentication present");
+    }
 
 
-type GithubOwner = {
-  login: string;
-  avatar_url: string;
-  html_url: string;
-};
+    const token = await ensureGithubToken(ctx)
+
+    const octokit = new Octokit({ auth: token });
+    const repos : GithubRepo[] = []
+
+    
+    const { data } = await octokit.rest.repos.listForAuthenticatedUser({
+      sort: "updated",
+      direction: "desc",
+      visibility: "all",
+      page: args.page,
+      per_page: 10,
+    });
+
+    
+    for(const repo of data){
+      repos.push({
+        id: repo.id,
+        name: repo.name,
+        full_name: repo.full_name,
+        private: repo.private,
+        html_url: repo.html_url,
+        ownerLogin: repo.owner.login,
+        ownerAvatar: repo.owner.avatar_url,
+        created_at: repo.created_at ?repo.created_at :"",
+        updated_at: repo.updated_at? repo.updated_at : "",
+        pushed_at: repo.pushed_at?repo.pushed_at : ""
+
+      })
+
+    }
+    return repos;
 
 
 
-type GithubRepoRaw = {
-  id: number;
-  name: string;
-  full_name: string;
-  private: boolean;
-  html_url: string;
-  owner: GithubOwner;
-  created_at: string;
-  updated_at: string;
-  pushed_at: string;
-  // description: string | null;
-};
 
 
-type GithubRepo = {
-  id: number;
-  name: string;
-  full_name: string;
-  private: boolean;
-  html_url: string;
-  ownerLogin: string;
-  ownerAvatar: string;
-  created_at: string;
-  updated_at: string;
-  pushed_at: string;
-  // description: string | null;
+}
+})
+export const getRepositoriesBySearch = action({
+  args: {
+    page:v.number(),
+    searchQuery:v.string(),
+  },
+  handler : async(ctx,args):Promise< GithubRepo[]> =>{
+    const identity = await ctx.auth.getUserIdentity()
+    if(!identity) {
+      throw new Error("Called getRepositories without authentication present");
+    }
 
- 
-};
+    const token = await ensureGithubToken(ctx)
+    console.log(identity)
+
+    const octokit = new Octokit({ auth: token });
+    const repos : GithubRepo[] = []
+
+    
+    const { data } = await octokit.rest.repos.listForAuthenticatedUser({
+      q: `${args.searchQuery} user:${identity.nickname}`, 
+      sort: "updated",
+      direction: "desc",
+      visibility: "all",
+      page: args.page,
+      per_page: 10,
+    });
+
+
+    for(const repo of data){
+      repos.push({
+        id: repo.id,
+        name: repo.name,
+        full_name: repo.full_name,
+        private: repo.private,
+        html_url: repo.html_url,
+        ownerLogin: repo.owner.login,
+        ownerAvatar: repo.owner.avatar_url,
+        created_at: repo.created_at ?repo.created_at :"",
+        updated_at: repo.updated_at? repo.updated_at : "",
+        pushed_at: repo.pushed_at?repo.pushed_at : ""
+
+      })
+
+    }
+    return repos;
+
+
+
+
+
+}
+})
 
 export const fetchGithubRepos = action({
   args: {},
-  handler: async (ctx): Promise<GithubRepo[]> => {
+  handler: async (ctx): Promise<GithubRepo[] | null> => {
+    const identity = ctx.auth.getUserIdentity()
+
+    if(!identity) {
+      return null
+    }
+
     const token = await ensureGithubToken(ctx);
 
     let page = 1;
@@ -225,19 +363,6 @@ export const getProjectHealthData = action({
 
   },
 });
-
-
-type GithubCollaborator = {
-  id: number;
-  login: string;
-  avatar_url: string;
-  html_url: string;
-  permissions?: {
-    admin: boolean;
-    push: boolean;
-    pull: boolean;
-  };
-};
 
 
 

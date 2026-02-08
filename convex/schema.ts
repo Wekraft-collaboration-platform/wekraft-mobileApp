@@ -15,6 +15,9 @@ export default defineSchema({
     inviteLink: v.optional(v.string()),
     // bio of the user
     bio: v.optional(v.string()),
+    occupation:v.optional(v.string()),
+    phoneNumber:v.optional(v.string()),
+    countryCode:v.optional(v.string()),
 
     impactScore : v.optional(v.number()),
     // GithubInfo 
