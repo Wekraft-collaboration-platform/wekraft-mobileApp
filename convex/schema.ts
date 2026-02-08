@@ -5,7 +5,7 @@ export default defineSchema({
   // USERS TABLE
   users: defineTable({
     name: v.string(),
-    tokenIdentifier: v.string(), //clerk user ID for auth
+    clerkId: v.string(), //clerk user ID for auth
     email: v.string(),
     imageUrl: v.optional(v.string()),
     hasCompletedOnboarding: v.boolean(),
@@ -46,7 +46,7 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
     //   INDEXES.....
-  }).index("by_token", ["tokenIdentifier"]),
+  }).index("by_clerkId", ["clerkId"]),
 
 
 

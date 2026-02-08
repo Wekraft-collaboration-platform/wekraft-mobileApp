@@ -17,9 +17,4 @@ export const FetchRepoColbarator =(owner:string,repo:string)=>{
         retry : 1
         }
     )
-
-
-
-
-
 }

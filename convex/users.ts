@@ -57,8 +57,8 @@ export const store = mutation({
     // Find user by tokenIdentifier
     const user = await ctx.db
       .query("users")
-      .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      .withIndex("by_clerkId", (q) =>
+        q.eq("clerkId", identity.subject)
       )
       .unique();
 
@@ -81,13 +81,11 @@ export const store = mutation({
     // Create new user
     return await ctx.db.insert("users", {
       name: identity.name ?? "Anonymous",
-      tokenIdentifier: identity.tokenIdentifier,
+      clerkId: identity.subject,
       email: identity.email ?? "",
       imageUrl: identity.pictureUrl ?? undefined,
 
       hasCompletedOnboarding: false,
-      bio: "",
-      impactScore: 0,
 
       githubUsername: identity.nickname ?? undefined,
       githubAccessToken: undefined, // will be set later after OAuth
@@ -128,8 +126,8 @@ export const getCurrentUser = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      .withIndex("by_clerkId", (q) =>
+        q.eq("clerkId", identity.subject)
       )
       .unique();
 
@@ -147,8 +145,8 @@ export const connectGithub = mutation({
 
     const user = await ctx.db
         .query("users")
-         .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+         .withIndex("by_clerkId", (q) =>
+        q.eq("clerkId", identity.subject)
       )
         .unique();
 
@@ -175,9 +173,9 @@ export const setGithubToken = mutation({
 
     const user = await ctx.db
         .query("users")
-         .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
-      )
+        .withIndex("by_clerkId", (q) =>
+            q.eq("clerkId", identity.subject)
+        )
         .unique();
 
     if (!user) throw new Error("User not found");
@@ -205,11 +203,11 @@ export const completeOnboarding = mutation({
     }
 
     const user = await ctx.db
-      .query("users")
-         .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
-      )
-      .unique();
+        .query("users")
+        .withIndex("by_clerkId", (q) =>
+            q.eq("clerkId", identity.subject)
+        )
+        .unique();
 
     if (!user) {
       throw new Error("User not found");
@@ -237,11 +235,11 @@ export const updateUser = mutation({
     }
 
     const user = await ctx.db
-      .query("users")
-         .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
-      )
-      .unique();
+        .query("users")
+        .withIndex("by_clerkId", (q) =>
+            q.eq("clerkId", identity.subject)
+        )
+        .unique();
 
     if (!user) {
       throw new Error("User not found");
@@ -264,21 +262,19 @@ export const updateUser = mutation({
 export const getGithubToken = query({
     args: {},
     handler: async (ctx) => {
-        const user = await ctx.auth.getUserIdentity();
+        const identity = await ctx.auth.getUserIdentity();
 
         // console.log("User : ", user)
-        if (!user) return null;
+        if (!identity) return null;
 
 
 
-        const dbUser = await ctx.db
-            .query("users")
-            .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", user.tokenIdentifier)
-      )
-            .first();
-
-
+      const dbUser = await ctx.db
+          .query("users")
+          .withIndex("by_clerkId", (q) =>
+              q.eq("clerkId", identity.subject)
+          )
+          .first();
 
         return dbUser?.githubAccessToken ?? null;
     },

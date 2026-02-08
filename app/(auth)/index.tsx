@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
-import LinearBackgroundPovider from '@/providers/LinearBackgroundPovider'
+import LinearBackgroundProvider from '@/providers/LinearBackgroundProvider'
 import { Ionicons } from "@expo/vector-icons"
 import { useSSO } from '@clerk/clerk-expo'
 import { useQueryClient } from '@tanstack/react-query'
@@ -62,7 +62,7 @@ const Index = () => {
 
   // Login Screen UI
   return (
-    <LinearBackgroundPovider>
+    <LinearBackgroundProvider>
       <View className='flex-1'>
 
 
@@ -135,7 +135,7 @@ const Index = () => {
               <ActivityIndicator size={"large"} color={"white"}/>
               </View>
           )}
-    </LinearBackgroundPovider>
+    </LinearBackgroundProvider>
   )
 }
 
