@@ -1,6 +1,5 @@
-import {Stack, Tabs} from "expo-router";
+import { Tabs} from "expo-router";
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
-import {Tab} from "@clerk/clerk-js/dist/types/ui/elements/Tabs";
 import {LinearGradient} from "expo-linear-gradient";
 import {colors} from "@/constraints/Colors";
 import {Ionicons} from "@expo/vector-icons";
@@ -10,7 +9,9 @@ export default function RootLayout() {
         <LinearBackgroundProvider isOn={false}>
 
             <Tabs
+
                 screenOptions={{
+                   animation:"shift",
                     headerShown: false,
                     tabBarShowLabel: false,
                     sceneStyle: {
@@ -34,7 +35,6 @@ export default function RootLayout() {
 
                 }}
             >
-
                 <Tabs.Screen
                     name={"index"}
                     options={{
@@ -47,6 +47,20 @@ export default function RootLayout() {
                         )
                     }}
                 />
+
+                <Tabs.Screen
+                    name={"project"}
+                    options={{
+                        tabBarIcon: ({ focused }) => (
+                            <Ionicons
+                                name={focused ? "folder" : "folder-outline"}
+                                size={24}
+                                color={focused ? "#fff" : "#a0a0a0ff"}
+                            />
+                        ),
+                    }}
+                />
+
             </Tabs>
         </LinearBackgroundProvider>
     )

@@ -387,7 +387,7 @@ const GitCard = ({ icon, score, title }: { icon: React.ReactNode, score: number,
     </View>
 );
 
-export const formatRelativeTime = (yearsFloat) => {
+export const formatRelativeTime = (yearsFloat:any) => {
     if (!yearsFloat || yearsFloat < 0) return "";
 
     if (yearsFloat >= 1) {
