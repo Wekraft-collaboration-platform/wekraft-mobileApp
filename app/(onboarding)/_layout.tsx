@@ -1,11 +1,11 @@
 import { OnBoardingProvider } from "@/context/OnBoardingContext";
-import LinearBackgroundPovider from "@/providers/LinearBackgroundPovider";
+import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 import { Stack } from "expo-router";
 
 export default function RootLayout() {
   return (
     <OnBoardingProvider>
-      <LinearBackgroundPovider>
+
 
 
         <Stack screenOptions={{
@@ -15,7 +15,7 @@ export default function RootLayout() {
           },
           animation:"slide_from_right"
         }} />
-      </LinearBackgroundPovider>
+
     </OnBoardingProvider>
   )
 }

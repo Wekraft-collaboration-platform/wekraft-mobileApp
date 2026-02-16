@@ -7,6 +7,7 @@ import Toast from 'react-native-toast-message'
 
 import { AVAILABLE_TAGS } from '@/constraints/StaticData'
 import { useOnboarding } from '@/context/OnBoardingContext'
+import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 
 
 
@@ -59,6 +60,8 @@ const DefineProject = () => {
 
 
     return (
+<LinearBackgroundProvider>
+
         <View style={{ flex: 1 }} >
             {/* <Text style={[styles.headerText]}>Define Project</Text> */}
             <ScrollView
@@ -84,91 +87,139 @@ const DefineProject = () => {
 
                     </View>
 
-                    {/* Thumbnail Editng */}
-                    <TouchableOpacity
-                        onPress={async () => {
-                            const uri = await pickThumbnail()
-                            if (!uri) return
-                            setData(prev => ({ ...prev, thumbnailUrl: uri }))
-                        }
-                        }
-                        style={styles.thumbnail}>
-                        {data.thumbnailUrl ? (
-                            <View
-                                style={styles.thumbnailImage}
-                            >
-                                <Image
-                                    source={{ uri: data.thumbnailUrl }}
-                                    style={styles.thumbnailImage}
-                                />
-                                <View className='absolute justify-center items-center top-0 left-0 right-0 bottom-0 bg-black/50'>
-                                    <Ionicons name="image-outline" size={32} color="white" />
-                                    <Text style={styles.thumbnailText}>
-                                        Add project thumbnail
-                                    </Text>
 
+                    {/*ThumbNail*/}
+                    <View>
+                        <Text style={[styles.label,{marginTop:16}]}>VISUAL IDENTITY</Text>
 
-                                </View>
-
-                            </View>
-                        ) : (
-                            <View style={[styles.thumbnailPlaceholder, { width: "100%", height: "100%", justifyContent: 'center', alignItems: 'center' }]}>
-                                <Text style={styles.thumbnailPlaceholderText}>
-                                    {data?.selctedrepo?.name?.trim()?.charAt(0).toUpperCase()}
-                                </Text>
-                                <View className='absolute justify-center items-center top-0 left-0 right-0 bottom-0 bg-black/50'>
-                                    <Ionicons name="image-outline" size={32} color="white" />
-                                    <Text style={styles.thumbnailText}>
-                                        Add project thumbnail
-                                    </Text>
-                                </View>
-                            </View>
-                        )}
-                    </TouchableOpacity>
-
-
-                    {/* Project Name */}
-                    <View >
-                        <Text style={[styles.label, { marginBottom: 8 }]}>PROJECT NAME</Text>
-                        <TextInput
-                            multiline
-                            value={data.projectName}
-                            placeholder="Enter project name"
-                            placeholderTextColor="#888"
-                            style={styles.input}
-                            onChangeText={(text) =>
-                                setData(prev => ({ ...prev, projectName: text }))
+                        <TouchableOpacity
+                            onPress={async () => {
+                                const uri = await pickThumbnail()
+                                if (!uri) return
+                                setData(prev=>({
+                                    ...prev,
+                                    thumbnailUrl:uri
+                                }))
                             }
+                            }
+                            activeOpacity={0.6}
+                            style={[styles.thumbnail,{aspectRatio: 0, height:170}]}
+
+                        >
+                            {data.thumbnailUrl? (
+                                <View style={styles.thumbnailImage}>
+
+                                    <Image source={{ uri: data.thumbnailUrl }} style={styles.thumbnailImage}/>
+
+                                    <View className={"absolute left-0 right-0 top-0 bottom-0 justify-center"}>
+                                        <View style={{backgroundColor:"rgba(136,136,136,0.4)", paddingVertical:7,paddingHorizontal:16, borderRadius:999 ,flexDirection:"row", gap:4, justifyContent:"center", alignItems:"center",alignSelf:"center"}}>
+                                            <Ionicons name={"camera"} size={32} color="white" />
+                                            <Text className={"text-white text-lg font-bold"}>Change Cover</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            ) : (
+                                <View style={styles.thumbnailImage}>
+
+                                    <View style={{
+                                        backgroundColor:"#090909",
+                                        flex:1,
+                                        justifyContent:"center",
+                                        alignItems:"center"
+                                    }}>
+
+                                        <Text style={{
+                                            color:"white",
+                                            fontSize:54,
+                                            fontWeight:"bold"
+                                        }}>{data.projectName.trim().charAt(0).toUpperCase()}</Text>
+                                    </View>
+
+                                    <View className={"absolute left-0 right-0 top-0 bottom-0 justify-center"}>
+                                        <View style={{backgroundColor:"rgba(136,136,136,0.4)", paddingVertical:7,paddingHorizontal:16, borderRadius:999 ,flexDirection:"row", gap:4, justifyContent:"center", alignItems:"center",alignSelf:"center"}}>
+                                            <Ionicons name={"camera"} size={32} color="white" />
+                                            <Text className={"text-white text-lg font-bold"}>Change Cover</Text>
+                                        </View>
+                                    </View>
+                                </View>
+
+                            )}
+
+
+
+
+                        </TouchableOpacity>
+
+                    </View>
+
+
+
+                    {/* Project Info */}
+                        <Text style={[styles.label, { marginBottom: 8 }]}>PROJECT INFO</Text>
+                    {/* Project description */}
+                    <View style={[{
+                        flexDirection:"row",
+                        alignItems:"center",
+                        width:"100%",
+                    },
+                        styles.input]}>
+
+
+
+                        <TextInput
+                            value={data.projectName}
+                            onChangeText={ (text) =>{
+
+                                setData(prev=>({
+                                    ...prev,
+                                    projectName:text
+                                }))
+                            }}
+                            placeholder="What will be This Project Called?"
+                            placeholderTextColor="#888"
+
+                            style={[{textAlign:"justify",textAlignVertical:"top",color:"white",flex:1}]}
                         />
+
                     </View>
 
 
                     {/* Project description */}
-                    <View >
-                        <Text style={[styles.label, { marginBottom: 8, marginTop: 16 }]}>PROJECT DESCRIPTION</Text>
+                    <View style={[{
+                        flexDirection:"row",
+                        alignItems:"center",
+                        width:"100%",
+                        marginVertical:16
+                    },
+                        styles.input]}>
+
+
+
                         <TextInput
-                            multiline
                             value={data.projectdescription}
-                            placeholder="Enter project description"
+                            onChangeText={ (text) =>{
+
+                            setData(prev=>({
+                                ...prev,
+                                projectdescription:text
+                            }))
+                            }}
+                            placeholder="What is this Project About?"
                             placeholderTextColor="#888"
-                            style={styles.input}
-                            onChangeText={(text) =>
-                                setData(prev => ({ ...prev, projectdescription: text }))
-                            }
+                            multiline
+                            style={[{minHeight:100,textAlign:"justify",textAlignVertical:"top",color:"white",flex:1}]}
                         />
+
                     </View>
 
 
-
                     {/* Visbility Switch */}
-
-                    <View className='mt-4'>
-                        <Text style={styles.label}>VISIBILITY</Text>
+                    <View >
                         <View style={[styles.card, { flexDirection: "row", justifyContent: "space-between", alignItems: "center" }, data.isPublic ? { backgroundColor: "#1A362B" } : {}]}>
 
                             <View className='flex-1'>
 
-                                <Text style={{ fontSize: 15, color: "white" }}>Public Visibility</Text>
+                                <Text style={{ fontSize: 15, color: "white", fontWeight:"bold" }}>Public Visibility</Text>
                                 <Text style={{ fontSize: 12, color: "gray" }}>Make your project visible to everyone. Public projects can be discovered by the community.</Text>
                             </View>
 
@@ -180,7 +231,14 @@ const DefineProject = () => {
 
 
                                 value={data.isPublic}
-                                onValueChange={(value) => setData(prev => ({ ...prev, isPublic: value }))}
+                                onValueChange={ (check)=>{
+
+                                setData(prevState => ({
+                                    ...prevState,
+                                    isPublic:check
+                                }))
+                                }
+                            }
                             />
                         </View>
                     </View>
@@ -189,26 +247,30 @@ const DefineProject = () => {
 
 
 
+
                     {/* Tags Sleection */}
 
                     <View >
-
-
-
-
-
                         {selectedTags.length > 0 && (
                             <View style={{ marginBottom: 0, marginTop: 16 }}>
-                                <Text style={[styles.label, { marginBottom: 8 }]}>TAGS</Text>
+                                <Text style={[styles.label, { marginBottom: 12,fontWeight:"bold" }]}>TAGS ({selectedTags.length}/5)</Text>
+                                {/* <Text style={styles.label}>SELECTED TAGS</Text> */}
 
                                 <View style={styles.tagsWrap}>
                                     {selectedTags.map(tag => (
                                         <TouchableOpacity
-                                            key={tag}
+                                            activeOpacity={0.6}
                                             onPress={() => toggleTag(tag)}
+                                            key={tag}
                                             style={[styles.tagChip, styles.tagChipSelected]}
                                         >
-                                            <Text style={styles.tagTextSelected}>{tag}</Text>
+                                            <View
+                                                style={{flexDirection:"row",gap:4,alignItems:"center", }}
+                                            >
+                                                <Text style={styles.tagTextSelected}>{tag}</Text>
+
+                                                <Ionicons name={"close-circle"} size={16} color="black" />
+                                            </View>
                                         </TouchableOpacity>
                                     ))}
                                 </View>
@@ -216,40 +278,59 @@ const DefineProject = () => {
                         )}
 
 
-                        <TextInput
-                            placeholder="Search tags"
+                        <View style={[{
+                            flexDirection:"row",
+                            alignItems:"center",
+                            width:"100%",
+                            gap:6,
+                            marginVertical: 16
+                        },
+                            styles.input]}>
 
-                            placeholderTextColor="#777"
-                            value={search}
-                            onChangeText={setSearch}
-                            style={[
-                                styles.input,
-                                { marginBottom: 12, marginTop: 16 }
-                            ]}
-                        />
+                            <Ionicons name={"search"} size={24} color={"#606060"}/>
+
+
+                            <TextInput
+                                placeholder="Search tags"
+                                placeholderTextColor="#777"
+                                value={search}
+                                onChangeText={setSearch}
+                                style={{
+                                    color:"white",
+                                    flex:1,
+                                }
+                                }
+                            />
+
+                        </View>
 
                     </View>
-                    <Text style={styles.label}>AVAILABLE TAGS</Text>
 
-                    <View style={styles.tagsContainer}>
-                        <ScrollView
-                            nestedScrollEnabled
-                            style={{ height: 220 }}
-                            showsVerticalScrollIndicator={false}
-                        >
-                            <View style={styles.tagsWrap}>
-                                {filteredAvailableTags.map(tag => (
-                                    <TouchableOpacity
-                                        key={tag}
-                                        onPress={() => toggleTag(tag)}
-                                        style={styles.tagChip}
-                                    >
+                    <ScrollView
+                        nestedScrollEnabled
+                        horizontal={true}
+
+                        showsVerticalScrollIndicator={false}
+                    >
+                        <View style={styles.tagsWrap}>
+                            {filteredAvailableTags.map(tag => (
+                                <TouchableOpacity
+                                    key={tag}
+                                    onPress={() => toggleTag(tag)}
+                                    style={styles.tagChip}
+                                >
+                                    <View style={{flexDirection:"row", gap:4, alignItems:"center"}}>
+
+                                        <Ionicons name={"add-outline"} size={14} color="white" />
+
+
                                         <Text style={styles.tagText}>{tag}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        </ScrollView>
-                    </View>
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </ScrollView>
+
 
 
 
@@ -290,6 +371,8 @@ const DefineProject = () => {
 
 
         </View>
+</LinearBackgroundProvider>
+
 
     )
 }
@@ -302,14 +385,17 @@ export default DefineProject
 
 
 const styles = StyleSheet.create({
+    headerText: {
+        fontSize: 24,
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
     container: {
         flex: 1,
-        paddingHorizontal: 24,
-        paddingTop: 48,
     },
     scrollContent: {
-        // padding: 20,
-        paddingBottom: 10,
+        paddingBottom: 40,
     },
 
     loadingOverlay: {
@@ -323,18 +409,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
         zIndex: 100,
     },
-    headerText: {
-        fontSize: 24,
-        color: "#A8ACB0",
-        textAlign: "center"
-    },
 
     card: {
         borderWidth: 1,
         borderColor: "#222",
         borderRadius: 16,
         padding: 12,
-        backgroundColor: "rgba(255,255,255,0.03)",
+        backgroundColor: "#111111",
 
     },
 
@@ -385,15 +466,13 @@ const styles = StyleSheet.create({
 
     thumbnail: {
         width: "100%",
-        aspectRatio: 16 / 9,
         borderRadius: 18,
         overflow: "hidden",
         backgroundColor: "rgba(255,255,255,0.06)",
         borderWidth: 1,
         borderColor: "#222",
-        marginTop: 16,
+        marginTop: 12,
         marginBottom: 24,
-
         justifyContent: "center",
         alignItems: "center",
     },
@@ -418,18 +497,16 @@ const styles = StyleSheet.create({
         color: "#6B6B6B",
         fontSize: 12,
         letterSpacing: 1,
-        marginBottom: 8,
+        // marginBottom: 8,
     },
 
     input: {
-        backgroundColor: "rgba(255,255,255,0.04)",
+        backgroundColor: "#111111",
         borderRadius: 16,
         borderWidth: 1,
-        // flex:1,
-        // width:"100%",
         borderColor: "#222",
         paddingHorizontal: 16,
-        paddingVertical: 14,
+        paddingVertical: 7,
         color: "white",
     },
 
@@ -440,8 +517,9 @@ const styles = StyleSheet.create({
     },
 
     addBtn: {
-        paddingHorizontal: 18,
-        borderRadius: 16,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        borderRadius: 10,
         backgroundColor: "white",
         justifyContent: "center",
     },
@@ -460,9 +538,9 @@ const styles = StyleSheet.create({
     tagChip: {
         paddingHorizontal: 14,
         paddingVertical: 8,
-        borderRadius: 999,
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: "#333",
+        borderColor: "#29292A",
     },
 
     tagChipSelected: {
@@ -482,7 +560,7 @@ const styles = StyleSheet.create({
 
     cta: {
         backgroundColor: "white",
-        marginBottom: 16,
+        marginTop: 16,
         borderRadius: 20,
         paddingVertical: 16,
         flexDirection: "row",
@@ -504,7 +582,7 @@ const styles = StyleSheet.create({
 
     thumbnailPlaceholder: {
         flex: 1,
-        backgroundColor: "rgba(255,255,255,0.02)",
+        backgroundColor: "#2b2b30",
         justifyContent: "center",
         alignItems: "center",
     },

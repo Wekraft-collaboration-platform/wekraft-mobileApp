@@ -9,6 +9,7 @@ import FetchingRepoSkeleton from "@/components/SkeletonLayout/FetchingRepoSkelet
 import Toast from 'react-native-toast-message'
 import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
+import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 
 const selectRepo = () => {
     const [page, setPage] = useState(1)
@@ -63,6 +64,8 @@ const selectRepo = () => {
 
 
     return (
+        <LinearBackgroundProvider>
+
 
         <View style={styles.container}>
             {/* Headers */}
@@ -333,13 +336,15 @@ const selectRepo = () => {
 
 
 
+        </View>
             {settingUp && (
                    <View style={styles.LoadingForeGround}>
                      <ActivityIndicator size={"large"} color={"white"} />
                      <Text style={styles.LoadingText}>Setting up your project...</Text>
                    </View>
                  )}
-        </View>
+
+        </LinearBackgroundProvider>
 
 
     )
@@ -352,15 +357,15 @@ const styles = StyleSheet.create({
     
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 48,
   },
 
     headerText: {
         fontSize: 24,
-        color: "#A8ACB0",
+        color: "white",
+        fontWeight: "bold",
         textAlign: "center"
     },
+
     headerText2: {
         fontSize: 32,
         color: "white",
