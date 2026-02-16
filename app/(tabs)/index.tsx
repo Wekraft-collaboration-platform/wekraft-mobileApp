@@ -6,7 +6,7 @@ import {Ionicons} from "@expo/vector-icons";
 import {useGithubDashBoardInfo} from "@/queries/dashBoard/dashBoardGithub";
 import ImpactRing from "@/components/Extras/ImpactRing";
 import {ImpactScoreResult} from "@/lib/impactScore";
-
+import {ImpactScoreBreakDownDialog} from "@/components/Dialogs/impactScoreBreakDownDialog";
 
 
 const getGreeting = () => {
@@ -24,7 +24,7 @@ const Index = () => {
     const [impactScore, setImpactScore] =
         useState<ImpactScoreResult | null>(null);
 
-
+    const [openImpactScore, setOpenImpactScore]  = useState(false)
 
     const {
         data,
@@ -108,8 +108,8 @@ const Index = () => {
                             marginTop: 16,
                             paddingHorizontal: 16,
                             paddingVertical: 12,
-                            backgroundColor: "#1A1A1C",
-                            borderColor: "#2D2D2F",
+                            backgroundColor: "#161618",
+                            borderColor: "#232325",
                             borderWidth: 2,
                             borderRadius: 24,
                             width: "100%"
@@ -159,7 +159,7 @@ const Index = () => {
                                 gap: 4
                             }}
                             onPress={() => {
-                                // setOpenImpactScore(true)
+                                setOpenImpactScore(true)
                             }}
                             >
 
@@ -190,7 +190,7 @@ const Index = () => {
                             />
 
 
-                            <View style={{flexDirection:"column",flex:1,gap:4,justifyContent:"center",width:"100%", marginHorizontal:24}}>
+                            <View style={{flexDirection:"column",flex:1,gap:8,justifyContent:"center",width:"100%", marginHorizontal:24}}>
 
 
                                 <View>
@@ -347,6 +347,12 @@ const Index = () => {
 
             </View>
 
+            <ImpactScoreBreakDownDialog
+                impactScore={impactScore}
+                onClose={() =>{
+                    setOpenImpactScore(false)
+                }}
+                visible={openImpactScore}/>
         </LinearBackgroundProvider>
 
     )
