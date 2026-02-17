@@ -5,11 +5,14 @@ import {api} from "@/convex/_generated/api";
 import {Ionicons} from "@expo/vector-icons";
 import {formatRelativeTime} from "@/components/Helper/helper";
 // import {useSafeState} from "@clerk/clerk-js/dist/types/ui/hooks";
+import projectOptionsDialog from "@/components/Dialogs/projectOptionsDialog";
+import ProjectOptionsDialog from "@/components/Dialogs/projectOptionsDialog";
 
 const Project = () => {
 
     const user = useQuery(api.users.getCurrentUser)
     const Projects = useQuery(api.projects.getProjects)
+    const [projectOptionsVisible, setProjectOptionsVisible] = useState<boolean>(false)
 
     if (Projects === undefined) {
         return (
@@ -86,7 +89,7 @@ const Project = () => {
                             console.log("Card Pressed")
                             }}
                             onLongPress={()=>{
-                                console.log("Card Long Pressed")
+                                setProjectOptionsVisible(true)
 
                             }}
 
@@ -100,6 +103,16 @@ const Project = () => {
                 />
 
             </View>
+
+            <ProjectOptionsDialog
+                visible={projectOptionsVisible}
+                onClick={(mode)=>{
+                    console.log(mode);
+                }}
+                onClose={()=>{
+                    setProjectOptionsVisible(false);
+                }}
+            />
 
 
         </View>
@@ -116,7 +129,6 @@ const ProjectCard = ({item,onPress,onLongPress} : ProjectCardProps) => {
 
 
     const isPublic = item.isPublic === true;
-    const [isEnabled, setIsEnabled] = useState(false);
     const [isPressed, setIsPressed] = useState(false); // tap lock
 
     const handlePress = () => {
