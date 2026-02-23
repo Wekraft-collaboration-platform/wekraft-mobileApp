@@ -38,12 +38,16 @@ export default function RootLayout() {
                     tabBarShowLabel: false,
                     sceneStyle: {
                         backgroundColor: "transparent",
+                        paddingBottom: hideTabBar
+                            ? 0
+                            : 65,
                     },
                     tabBarStyle: {
+                        backgroundColor: "transparent",
                         borderTopWidth: 0,
                         elevation: 0,
-                        backgroundColor: "transparent",
-                        transform:[{translateY:translateY}]
+                        position: "absolute",
+                        transform: [{ translateY }],
                     },
 
                     tabBarBackground: () => (
@@ -83,6 +87,7 @@ export default function RootLayout() {
                         ),
                     }}
                 />
+
 
             </Tabs>
         </LinearBackgroundProvider>

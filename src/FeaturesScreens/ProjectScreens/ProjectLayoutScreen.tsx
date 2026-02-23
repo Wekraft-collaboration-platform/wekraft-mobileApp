@@ -5,10 +5,22 @@ import {Ionicons} from "@expo/vector-icons";
 import {router} from "expo-router";
 import ProjectStatsTabScreen from "@/components/TabScreens/projectStatsTabScreen"
 import ProjectAboutTabScreen from "@/components/TabScreens/projectAboutTabScreen"
+import {useGithubProjectHealth} from "@/queries/project/useGithubProjectHealth";
+import {useGithubLanguages} from "@/queries/project/useGithubLanguages";
 
 const ProjectLayoutScreen = () => {
     const {project,mode} = useProject()
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
+
+    const {
+        data: health,
+        isLoading: healthLoading
+    } = useGithubProjectHealth(project?.repoOwner as string, project?.repoName as string)
+    const {
+        data: languages,
+        isLoading: languagesLoading
+    } = useGithubLanguages(project?.repoOwner as string, project?.repoName as string)
+
 
     if(!project){
         return (
@@ -109,7 +121,7 @@ const ProjectLayoutScreen = () => {
             gap:12
         }}
         contentContainerStyle={{
-            paddingBottom:80,
+            paddingBottom:40
         }}
         >
             {/*  thumbnail   */}
@@ -275,7 +287,36 @@ const ProjectLayoutScreen = () => {
 
             {/*  Tabs Screen   */}
             {selectedTab === "Stats" && (
-                <ProjectStatsTabScreen/>
+                <ProjectStatsTabScreen
+                    projectData={project}
+                    mode={mode}
+                    health={health}
+                    languages={languages}
+                    openIssue={()=>{
+                        console.log("Opened Issue");
+                    }
+                    }
+                    openPr={()=>{
+                        console.log("Opened Pr");
+                    }
+                    }
+                    stopNavigation={()=>{
+                        console.log("StopNavigation");
+                    }
+                    }
+                    openHealth={()=>{
+                        console.log("Opened Health");
+                    }
+                    }
+                    openCommits={()=>{
+                        console.log("Opened Commmits");
+                    }
+                    }
+                    handleRequestJoin={()=>{
+                        console.log("Handle Request Join");
+                    }
+                    }
+                />
 
             )}
 

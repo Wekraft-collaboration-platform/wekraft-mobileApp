@@ -191,6 +191,23 @@ export const updateProject = mutation({
         })
       )
     ),
+    healthScore: v.optional(
+        v.object({
+          totalScore: v.number(), // 0–100
+          activityMomentum: v.number(), // 0–35
+          maintenanceQuality: v.number(), // 0–35
+          communityTrust: v.number(), // 0–20
+          freshness: v.number(), // 0–10
+          lastCalculatedDate: v.string(), // YYYY-MM-DD
+          // Stores last 2 health scores only
+          previousScores: v.array(
+              v.object({
+                totalScore: v.number(), // 0–100
+                calculatedDate: v.string(), // YYYY-MM-DD
+              })
+          ),
+        })
+    ),
     thumbnailUrl:v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -225,6 +242,7 @@ export const updateProject = mutation({
       updatedAt: Date.now(),
     };
 
+    if(args.healthScore !== undefined) updates.healthScore = args.healthScore
     if (args.description !== undefined) updates.description = args.description;
     if (args.about !== undefined) updates.about = args.about;
     if (args.tags !== undefined) {

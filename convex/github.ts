@@ -271,6 +271,27 @@ export const fetchGithubRepos = action({
   },
 });
 
+type CommitNode = {
+  committedDate: string;
+};
+
+type IssueNode = {
+  createdAt: string;
+  closedAt: string | null;
+  comments: { totalCount: number };
+};
+
+type PRNode = {
+  mergedAt: string | null;
+  additions: number;
+  deletions: number;
+  files: { totalCount: number };
+  labels: { nodes: { name: string }[] };
+};
+
+type LabelNode = {
+  name: string;
+};
 
 export const getProjectHealthData = action({
   args: {
@@ -282,16 +303,19 @@ export const getProjectHealthData = action({
     const octokit = new Octokit({ auth: token });
 
     const query = `
-      query ($owner: String!, $repo: String!) {
+       query ($owner: String!, $repo: String!, $since: GitTimestamp!) {
         repository(owner: $owner, name: $repo) {
-          issues {
-            totalCount
+        
+          openIssues: issues(states: OPEN) {
+          totalCount
           }
           closedIssues: issues(states: CLOSED) {
             totalCount
           }
-          pullRequests {
-            totalCount
+          pullRequests(first:100) {
+            nodes {
+              merged
+            }
           }
           mergedPRs: pullRequests(states: MERGED) {
             totalCount
@@ -300,68 +324,240 @@ export const getProjectHealthData = action({
             target {
               ... on Commit {
                 committedDate
-                history(
-                  since: "${new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString()}"
-                  first: 100
-                ) {
+
+                history {
+                  totalCount
+                }
+
+                recentHistory: history(first: 100, since: $since) {
                   nodes {
                     committedDate
                   }
                 }
-
               }
             }
           }
+          recentClosedIssues: issues(
+            states: CLOSED,
+            first: 50,
+            orderBy: { field: UPDATED_AT, direction: DESC }
+          ) {
+            nodes {
+              createdAt
+              closedAt
+              comments {
+                totalCount
+              }
+            }
+          }
+
+          recentMergedPRs: pullRequests(
+            states: MERGED,
+            first: 50,
+            orderBy: { field: UPDATED_AT, direction: DESC }
+          ) {
+            nodes {
+              mergedAt
+              additions
+              deletions
+              files {
+                totalCount
+              }
+              labels(first: 10) {
+                nodes {
+                  name
+                }
+              }
+            }
         }
+      }
       }
     `;
 
-    const res: any = await octokit.graphql(query, {
-      owner: args.owner,
-      repo: args.repo,
-    });
-    
+      const now = Date.now();
+      const DAY = 24 * 60 * 60 * 1000;
 
-    const buckets = Array(60).fill(0);
-    const now = Date.now();
+    const since60Days = new Date(now - 60 * DAY).toISOString();
+      const sevenDaysAgo = now - 7 * DAY;
+      const fourteenDaysAgo = now - 14 * DAY;
 
-    res.repository.defaultBranchRef.target.history.nodes.forEach(
-      (commit: any) => {
-        const daysAgo = Math.floor(
-          (now - new Date(commit.committedDate).getTime()) /
-          (24 * 60 * 60 * 1000)
-        );
+      const res: any = await octokit.graphql(query, {
+        owner: args.owner,
+        repo: args.repo,
+        since:since60Days
+      });
 
-        
-        if (daysAgo >= 0 && daysAgo < 60) {
-            buckets[daysAgo]++
-        }
-      }
-    );
 
-    const openIssues =
-      res.repository.issues.totalCount -
-      res.repository.closedIssues.totalCount;
 
-    const closedIssues = res.repository.closedIssues.totalCount;
 
-    const totalPRs = res.repository.pullRequests.totalCount;
-    const mergedPRs = res.repository.mergedPRs.totalCount;
+    const repo = res.repository;
+
+    const commitData = repo.defaultBranchRef?.target;
+
+    const commits: CommitNode[] = commitData?.recentHistory?.nodes ?? [];
+
+    // ✅ Issue counts (exact)
+    const openIssuesCount = repo.openIssues.totalCount;
+    const closedIssuesCount = repo.closedIssues.totalCount;
+
+    // ✅ Commit data (max 100, same as REST)
+    const totalCommits =
+        commitData?.history?.totalCount ?? 0;
+
+// ✅ Last 60 days commits (array)
+    const recentCommits =
+        commitData?.recentHistory?.nodes ?? [];
+
+    const commitsLast60Days = recentCommits.length;
+
+    const lastCommitDate =
+        commitData?.committedDate ?? null;
+
+    const prs = repo.pullRequests?.nodes ?? [];
+
+    const totalPRs = prs.length;
+    const mergedPRs = prs.filter((pr: any) => pr.merged).length;
 
     const prMergeRate =
-      totalPRs === 0 ? 0 : Math.round((mergedPRs / totalPRs) * 100);
+        totalPRs > 0 ? Math.round((mergedPRs / totalPRs) * 100) : 0;
+
+
+    // ---- Velocity windows ----
+    const commitsCurrent = commits.filter((c) =>
+        new Date(c.committedDate).getTime() >= sevenDaysAgo
+    );
+
+    const commitsPrevious = commits.filter(c => {
+      const t = new Date(c.committedDate).getTime();
+      return t >= fourteenDaysAgo && t < sevenDaysAgo;
+    });
+
+    const commitScoreCurrent = commitsCurrent.length ;
+    const commitScorePrev = commitsPrevious.length  ;
+
+
+    // ---- Issues ----
+    let issueScoreCurrent = 0;
+    let issueCount = 0
+    let issueScorePrev = 0;
+
+    const issues: IssueNode[] = repo.recentClosedIssues?.nodes ?? [];
+
+
+    for (const issue of issues) {
+      if (!issue.closedAt) continue;
+
+      const closedAt = new Date(issue.closedAt).getTime();
+      const createdAt = new Date(issue.createdAt).getTime();
+
+      const hoursOpen =
+          (closedAt - createdAt) / (1000 * 60 * 60);
+
+      if (hoursOpen < 1 && issue.comments.totalCount === 0)
+        continue;
+
+      let factor = 1;
+      if (hoursOpen < 24) factor = 0.5;
+
+      if (closedAt >= sevenDaysAgo) {
+        issueCount++;
+        issueScoreCurrent += 3 * factor;
+      } else if (closedAt >= fourteenDaysAgo) {
+        issueScorePrev += 3 * factor;
+      }
+    }
+
+
+    // ---- PRs ----
+    let prScoreCurrent = 0;
+    let prCount = 0
+
+    let prScorePrev = 0;
+
+    const recentPRs: PRNode[] = repo.recentMergedPRs?.nodes ?? [];
+
+    for (const pr of recentPRs) {
+      if (!pr.mergedAt) continue;
+
+      const mergedAt = new Date(pr.mergedAt).getTime();
+
+      const isDocs =
+          pr.labels.nodes.some((l) =>
+              l.name.toLowerCase().includes("doc")
+          ) || pr.files.totalCount <= 1;
+
+      const size = pr.additions + pr.deletions;
+      const weight = isDocs ? 2 : size < 20 ? 3 : 5;
+
+      if (mergedAt >= sevenDaysAgo) {
+        prCount++;
+        prScoreCurrent += weight;
+      } else if (mergedAt >= fourteenDaysAgo) {
+        prScorePrev += weight;
+      }
+    }
+
+
+    // ---- Final velocities ----
+    const velocityCurrent =
+        commitScoreCurrent + issueScoreCurrent + prScoreCurrent;
+
+    const velocityPrevious =
+        commitScorePrev + issueScorePrev + prScorePrev;
+
+    const velocityDelta = velocityCurrent - velocityPrevious;
+
+    // ---- Fresh repo validation ----
+    const repoCreatedAt = new Date(res.repository.createdAt).getTime();
+    const repoAgeDays = (now - repoCreatedAt) / DAY;
+
+    const isFreshRepo =
+        repoAgeDays < 14 ||
+        res.repository.defaultBranchRef?.target?.history?.totalCount < 5 ||
+        commitsLast60Days === commitScoreCurrent;
+
+    let velocityTrend: "up" | "down" | "flat" | "insufficient" =
+        "flat";
+
+    if (isFreshRepo) {
+      velocityTrend = "insufficient";
+    } else if (velocityDelta >= 2) {
+      velocityTrend = "up";
+    } else if (velocityDelta <= -2) {
+      velocityTrend = "down";
+    }
+
 
     return {
-      openIssuesCount: openIssues,
-      closedIssuesCount: closedIssues,
-      lastCommitDate:
-        res.repository.defaultBranchRef?.target?.committedDate ?? null,
-      commitsLast60Days: buckets.reduce((a, b) => a + b, 0),
-      commitBuckets: buckets,
+      openIssuesCount,
+      closedIssuesCount,
+      lastCommitDate,
+      totalCommits,
+      commitsLast60Days,
+      totalPRs,
+      mergedPRs,
       prMergeRate,
-    };
 
+      issueCount:issueCount,
+      prCount:prCount,
+
+      velocity7d: Math.round(velocityCurrent),
+      velocityPrev7d: Math.round(velocityPrevious),
+      velocityDelta,
+      velocityTrend,
+      isFreshRepo,
+
+      velocityBreakdown: {
+        commits: commitScoreCurrent,
+        issues: issueScoreCurrent,
+        prs: prScoreCurrent,
+      },
+
+
+    };
   },
+
+
 });
 
 
