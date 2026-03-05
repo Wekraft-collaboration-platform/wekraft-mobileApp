@@ -25,7 +25,7 @@ const CommitCard = ({ item, index, isLast }: { item: any; index: number; isLast:
             }}
             className="flex-row "
         >
-            {/* Timeline */}
+
             <View className="items-center mr-4">
                 <View className="w-3 h-3 rounded-full bg-purple-500 mt-5 z-10 shadow-lg shadow-purple-500/50" />
                 {!isLast && <View className="w-[1px] flex-1 bg-neutral-800" />}
@@ -83,22 +83,25 @@ const EmptyState = () => (
         </View>
         <Text className="text-white text-lg font-bold mb-2">No Commits Found</Text>
         <Text className="text-neutral-500 text-center text-sm leading-5">
-           We couldn&#39;t find any commit history for this repository. Try checking the branch or refreshing.
+            We couldn't find any commit history for this repository. Try checking the branch or refreshing.
         </Text>
     </MotiView>
 );
 
-function ProjectCommits() {
+function ProjectCommitsScreen() {
     const { project } = useProject();
     const { data: commitData, isLoading, isError } = useGetProjectCommits(
         project?.repoOwner ?? "",
         project?.repoName ?? ""
     );
 
-    if (!project || isLoading) return (
-        <View className={"flex-1 justify-center items-center"} > <Text>Loading....</Text></View>
-    );
-
+    if (!project || isLoading) {
+        return (
+            <View className="flex-1 justify-center items-center">
+                <Text className="text-white">Loading....</Text>
+            </View>
+        );
+    }
     return (
             <View style={{
                 flex:1,
@@ -144,4 +147,4 @@ function ProjectCommits() {
     );
 }
 
-export default ProjectCommits;
+export default ProjectCommitsScreen;

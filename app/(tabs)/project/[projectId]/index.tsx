@@ -20,6 +20,7 @@ const Index = () => {
 
                 }}
                 onOpenIssue={() => {
+                    router.push(`/project/${projectId}/issueScreen`)
 
                 }}
                 onOpenHealth={() => {

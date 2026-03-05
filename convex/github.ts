@@ -874,3 +874,44 @@ export const getProjectPrs = action({
   }
 })
 
+
+
+
+// Get project Issues
+
+
+export const getProjectIssue = action({
+  args:{
+    owner:v.string(),
+    repo:v.string()
+  },
+  handler : async(ctx,args) =>{
+
+    const identity = await ctx.auth.getUserIdentity()
+
+    if(!identity){
+      throw new Error("calling Project Issue without Auth")
+    }
+
+    const token = await ensureGithubToken(ctx)
+    if(!token){
+      throw new Error("Calling Project Issues without Token")
+    }
+
+    const octokit = new Octokit({auth:token})
+
+    const issues = await octokit.paginate(
+        octokit.rest.issues.listForRepo,
+        {
+          owner:args.owner,
+          repo:args.repo,
+          state: "all",
+          per_page: 100,
+        }
+    )
+
+
+    // Remove pull requests
+    return issues.filter(issue => !issue.pull_request)
+  }
+})

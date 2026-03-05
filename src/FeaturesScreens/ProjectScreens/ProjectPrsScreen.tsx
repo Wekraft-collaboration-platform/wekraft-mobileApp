@@ -62,7 +62,6 @@ const PullRequestCard = ({ pr, index }: { pr: any, index: number }) => {
                 onPress={() => setExpanded(v => !v)}
                 className="bg-neutral-900/40 border border-neutral-800/60 rounded-2xl p-4 mb-3"
             >
-                {/* Header */}
                 <View className="flex-row justify-between items-center mb-2">
                     <Text className="text-neutral-500 font-mono text-[10px] tracking-widest">#{pr.number}</Text>
                     <View className={`px-2 py-0.5 rounded-md border ${statusStyles.container}`}>
@@ -127,7 +126,7 @@ const PullRequestCard = ({ pr, index }: { pr: any, index: number }) => {
     )
 }
 
-function ProjectPullRequests() {
+function ProjectPrsScreen() {
     type PRStatus = "all" | "open" | "closed" | "merged"
     const [statusFilter, setStatusFilter] = useState<PRStatus>("open")
     const { project } = useProject()
@@ -146,9 +145,13 @@ function ProjectPullRequests() {
         return pulls.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     }, [data, statusFilter])
 
-    if (!project || isLoading) return(
-        <View className={"flex-1 justify-center items-center"} > <Text>Loading....</Text></View>
-    )
+    if (!project || isLoading) {
+        return (
+            <View className="flex-1 justify-center items-center">
+                <Text className="text-white">Loading....</Text>
+            </View>
+        );
+    }
 
     return (
             <View style={{
@@ -206,4 +209,4 @@ function ProjectPullRequests() {
     )
 }
 
-export default ProjectPullRequests
+export default ProjectPrsScreen
