@@ -9,8 +9,8 @@ export const useGithubDashBoardInfo =(clerkId : string, githubName:string)=>{
             queryFn: async()=> {
                return await fetchGithubDashBoardData({clerkId,githubName})
             },
-            staleTime : 1000*60*30,
-            gcTime : 1000*60*30,
+            // staleTime : 1000*60*30,
+            // gcTime : 1000*60*30,
             enabled : Boolean(clerkId && githubName),
             retry : 1
         }

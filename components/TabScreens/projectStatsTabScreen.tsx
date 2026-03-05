@@ -5,12 +5,12 @@ import {Ionicons} from "@expo/vector-icons";
 import {GithubPrMergeRateIcon, TrendDownIcon, TrendFlatIcon, TeamsIcon,TrendUpIcon, WarningIcon} from "@/components/Icons";
 import {router} from "expo-router";
 import VelocityBreakdownDialog from "@/components/Dialogs/VelocityBreakdownDialog";
-import ProgressBar from "@/components/Helper/progressbar";
+import LanguageListItem from "@/components/Helper/LanguageListItem"
 import AdminProjectHealthEmptyState from "@/components/EmptyStates/AdminProjectHealthEmptyState";
 import UserProjectHealthEmptyState from "@/components/EmptyStates/UserProjectHealthEmptyState";
 
 const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,stopNavigation,openHealth,openCommits,mode,handleRequestJoin} :
-                    {mode:String,projectData:any,health:any,languages:any,openIssue:()=>void,openPr:()=>void,stopNavigation:(stop:boolean)=>void,openHealth:()=>void,openCommits:()=>void,handleRequestJoin: (role:string)=>void}) => {
+                               {mode:String,projectData:any,health:any,languages:any,openIssue:()=>void,openPr:()=>void,stopNavigation:(stop:boolean)=>void,openHealth:()=>void,openCommits:()=>void,handleRequestJoin: (role:string)=>void}) => {
 
 
     const [open, setOpen] = useState(false);
@@ -121,20 +121,21 @@ const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,st
 
             {/* Lamguges */}
 
-            <View style={{
-                marginTop: 16, flex: 1, justifyContent: "center",         backgroundColor: "#18181b",
-                borderColor: "#3f3f46",
-                borderWidth: 1,
-                borderRadius: 24,
-                padding: 16,
-            }}>
-                <Text style={[styles.sectionHeader, { marginBottom: 7 ,fontWeight: "700"}]}>Project Languages</Text>
+            <View style={styles.container}>
+                <Text style={[styles.sectionHeader, { marginBottom: 12, letterSpacing :1,fontWeight: "700", color: "#fff" }]}>
+                    {"<>"} Project Languages
+                </Text>
 
-                {languages?.breakdown.map(item=>(
-                    <ProgressBar key={item.language} value={item.percentage} languageName={item.language} />
-
-                ))}
-
+                <View style={styles.listContainer}>
+                    {languages?.breakdown.map((item, index) => (
+                        <LanguageListItem
+                            key={item.language}
+                            value={item.percentage}
+                            languageName={item.language}
+                            isLast={index === languages.breakdown.length - 1}
+                        />
+                    ))}
+                </View>
             </View>
 
 
@@ -481,4 +482,12 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.6)',
     },
     dot: { width: 6, height: 6, borderRadius: 3 },
+
+    container: {
+        marginTop: 16, flex: 1, backgroundColor: "#18181b",
+        borderColor: "#3f3f46", borderWidth: 1, borderRadius: 24, padding: 16,
+    },
+    listContainer: {
+        paddingHorizontal: 8,
+    },
 })

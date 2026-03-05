@@ -66,7 +66,7 @@ export default function SemiCircle({ score = 87, openH ,reFresh,visibleRefresh =
 
   return (
       <View style={styles.outerWrapper}>
-          <Text style={[styles.footerTitle,{alignItems:"flex-start",width:"100%",fontSize: 20}]}>Project Health</Text>
+          <Text style={[styles.footerTitle,{alignItems:"flex-start",width:"100%",fontSize: 20,letterSpacing : 1}]}>Project Health</Text>
         <View style={styles.chartContainer}>
           <View>
 
