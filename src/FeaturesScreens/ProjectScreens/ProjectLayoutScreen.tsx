@@ -12,9 +12,10 @@ import {useGithubLanguages} from "@/queries/project/useGithubLanguages";
 type ProjectLayoutScreenProps = {
     onCommits: () => void;
     onPr: () => void;
+    onOpenHealth: () => void;
     onOpenIssue: () => void;
 }
-const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue}: ProjectLayoutScreenProps) => {
+const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue}: ProjectLayoutScreenProps) => {
     const {project, mode} = useProject()
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
 
@@ -304,11 +305,11 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue}: ProjectLayoutScreen
                         health={health}
                         languages={languages}
                         openIssue={() => {
-                            console.log("Opened Issue");
+                            onOpenIssue()
                         }
                         }
                         openPr={() => {
-                            console.log("Opened Pr");
+                            onPr()
                         }
                         }
                         stopNavigation={() => {
@@ -316,7 +317,7 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue}: ProjectLayoutScreen
                         }
                         }
                         openHealth={() => {
-                            console.log("Opened Health");
+                            onOpenHealth()
                         }
                         }
                         openCommits={() => {

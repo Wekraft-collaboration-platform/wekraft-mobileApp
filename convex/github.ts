@@ -833,3 +833,44 @@ export const getProjectCommits = action({
   }
 })
 
+
+
+
+//    Get Projects Pulls Request
+
+export const getProjectPrs = action({
+  args:{
+    owner:v.string(),
+    repo:v.string()
+  },
+  handler : async(ctx,args) =>{
+
+    const identity = await ctx.auth.getUserIdentity()
+
+    if(!identity){
+      throw new Error("calling Project Pulls without Auth")
+    }
+
+    const token = await ensureGithubToken(ctx)
+    if(!token){
+      throw new Error("Calling Project Pulls without Token")
+    }
+
+    const octokit = new Octokit({auth:token})
+
+    const pullRequests = await octokit.paginate(
+        octokit.rest.pulls.list,
+        {
+          owner:args.owner,
+          repo:args.repo,
+          state: "all",
+          per_page: 100,
+        }
+    )
+
+
+    // Remove pull requests
+    return pullRequests
+  }
+})
+

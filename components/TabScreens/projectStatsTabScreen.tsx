@@ -87,7 +87,7 @@ const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,st
                 />
                 < MetricCard
                     icon={< GithubPrMergeRateIcon size={22} color="#C88AFF"/>}
-                    value={`${health?.openPRsCount}`}
+                    value={`${health?.prCount}`}
                     label="Open PR"
                     onPress={() => {
                         openPr()

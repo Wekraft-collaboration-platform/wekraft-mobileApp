@@ -83,7 +83,7 @@ const EmptyState = () => (
         </View>
         <Text className="text-white text-lg font-bold mb-2">No Commits Found</Text>
         <Text className="text-neutral-500 text-center text-sm leading-5">
-            We couldn't find any commit history for this repository. Try checking the branch or refreshing.
+           We couldn&#39;t find any commit history for this repository. Try checking the branch or refreshing.
         </Text>
     </MotiView>
 );
