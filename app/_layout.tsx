@@ -97,9 +97,4 @@
     return <Redirect href="/(tabs)" />
 
 
-
-
-
-
-
   }

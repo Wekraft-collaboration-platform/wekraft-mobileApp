@@ -159,6 +159,8 @@ export const getRepositories = action({
 
 }
 })
+
+
 export const getRepositoriesBySearch = action({
   args: {
     page:v.number(),
@@ -653,8 +655,6 @@ export const fetchRepoLanguages = action({
 });
 
 
-
-
 export const getGithubToken = action({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -800,3 +800,36 @@ export const getDashboardStats = action({
     };
   },
 });
+
+
+//   Get Project Commits data
+
+export const getProjectCommits = action({
+  args:{
+    owner:v.string(),
+    repo : v.string(),
+  },
+  handler : async (ctx,args)=>{
+    const identiy = await  ctx.auth.getUserIdentity()
+    if(!identiy) {
+      throw new Error("call commits with out Authentication")
+    }
+
+    const token = await ensureGithubToken(ctx)
+    if(!token){
+      throw  new Error("call commits with out token")
+    }
+
+
+    const octokit = new Octokit({
+      auth:token
+    })
+
+    return await octokit.rest.repos.listCommits({
+      owner: args.owner,
+      repo: args.repo,
+      per_page: 100,
+    });
+  }
+})
+

@@ -8,8 +8,14 @@ import ProjectAboutTabScreen from "@/components/TabScreens/projectAboutTabScreen
 import {useGithubProjectHealth} from "@/queries/project/useGithubProjectHealth";
 import {useGithubLanguages} from "@/queries/project/useGithubLanguages";
 
-const ProjectLayoutScreen = () => {
-    const {project,mode} = useProject()
+
+type ProjectLayoutScreenProps = {
+    onCommits: () => void;
+    onPr: () => void;
+    onOpenIssue: () => void;
+}
+const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue}: ProjectLayoutScreenProps) => {
+    const {project, mode} = useProject()
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
 
     const {
@@ -22,7 +28,7 @@ const ProjectLayoutScreen = () => {
     } = useGithubLanguages(project?.repoOwner as string, project?.repoName as string)
 
 
-    if(!project){
+    if (!project) {
         return (
             <View className={"flex-1 justify-center items-center"}>
                 <Text className={"text-white text-xl"}>Loading...</Text>
@@ -30,60 +36,23 @@ const ProjectLayoutScreen = () => {
         )
     }
 
-  return (
-    <View
-    style={{
-        flex: 1,
-        marginHorizontal: 16
-    }}>
-        {/*Header */}
-        <View>
-
-            <View style={{
-                flexDirection:"row",
-                alignItems:"center",
-                gap:10,
+    return (
+        <View
+            style={{
+                flex: 1,
+                marginHorizontal: 16
             }}>
-                <TouchableOpacity
-                onPress={()=>{
-                    router.back()
+            {/*Header */}
+            <View>
 
-                }}
-                activeOpacity={0.7}
-                style={{
-                    backgroundColor: "#1C1C1E",
-                    borderColor: "#2D2D2F",
-                    borderWidth: 2,
-                    borderRadius: 12,
-                    padding: 7,
-                }}
-                >
-
-                <Ionicons name="chevron-back" size={32} color="white" />
-                </TouchableOpacity>
-
-                <View>
-                    <Text style={{
-                        letterSpacing:1,
-                        color:"white",
-                        fontSize:17,
-                        fontWeight:"600"
-                    }}>{project.projectName}</Text>
-                    <Text
-                    style={{
-                        letterSpacing:1,
-                        color:"#717682",
-                        fontSize:12,
-                        fontWeight:"600"
-
-                    }}>{project.repoOwner}</Text>
-                </View>
-                <View style={{flex:1}}/>
-
-                {mode === "admin" && (
+                <View style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 10,
+                }}>
                     <TouchableOpacity
-                        onPress={()=>{
-                            // router.back()
+                        onPress={() => {
+                            router.back()
 
                         }}
                         activeOpacity={0.7}
@@ -96,250 +65,292 @@ const ProjectLayoutScreen = () => {
                         }}
                     >
 
-                        <Ionicons
-                            name="ellipsis-vertical-outline"
-                            size={32}
-                            color="white"
-                            style={{ transform: [{ rotate: '90deg' }] }}
-                        />
+                        <Ionicons name="chevron-back" size={32} color="white"/>
                     </TouchableOpacity>
 
-                )}
-
-
-
-
-            </View>
-        </View>
-
-        {/* Main Content */}
-
-        <ScrollView
-        overScrollMode={"never"}
-        bounces={false}
-        style={{
-            gap:12
-        }}
-        contentContainerStyle={{
-            paddingBottom:40
-        }}
-        >
-            {/*  thumbnail   */}
-            <View style={{width: "100%", height: 170,overflow:"hidden", borderRadius:16,marginTop:16}}>
-
-
-                {project.thumbnailUrl ? (
-
-
-                    <Image source={{uri: project.thumbnailUrl}} resizeMode={"cover"}
-                           style={{width: "100%", height: "100%"}}/>
-
-
-                ) : (
-
-                    <View style={{
-                        flex: 1,
-                        backgroundColor: "#222",
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}>
-
+                    <View>
                         <Text style={{
-                            color: '#444', fontSize: 40, fontWeight: '800'
-                        }}>
-                            {project.repoName?.charAt(0).toUpperCase()}
-                        </Text>
+                            letterSpacing: 1,
+                            color: "white",
+                            fontSize: 17,
+                            fontWeight: "600"
+                        }}>{project.projectName}</Text>
+                        <Text
+                            style={{
+                                letterSpacing: 1,
+                                color: "#717682",
+                                fontSize: 12,
+                                fontWeight: "600"
 
+                            }}>{project.repoOwner}</Text>
+                    </View>
+                    <View style={{flex: 1}}/>
+
+                    {mode === "admin" && (
+                        <TouchableOpacity
+                            onPress={() => {
+                                // router.back()
+
+                            }}
+                            activeOpacity={0.7}
+                            style={{
+                                backgroundColor: "#1C1C1E",
+                                borderColor: "#2D2D2F",
+                                borderWidth: 2,
+                                borderRadius: 12,
+                                padding: 7,
+                            }}
+                        >
+
+                            <Ionicons
+                                name="ellipsis-vertical-outline"
+                                size={32}
+                                color="white"
+                                style={{transform: [{rotate: '90deg'}]}}
+                            />
+                        </TouchableOpacity>
+
+                    )}
+
+
+                </View>
+            </View>
+
+            {/* Main Content */}
+
+            <ScrollView
+                overScrollMode={"never"}
+                bounces={false}
+                style={{
+                    gap: 12
+                }}
+                contentContainerStyle={{
+                    paddingBottom: 40
+                }}
+            >
+                {/*  thumbnail   */}
+                <View style={{width: "100%", height: 170, overflow: "hidden", borderRadius: 16, marginTop: 16}}>
+
+
+                    {project.thumbnailUrl ? (
+
+
+                        <Image source={{uri: project.thumbnailUrl}} resizeMode={"cover"}
+                               style={{width: "100%", height: "100%"}}/>
+
+
+                    ) : (
+
+                        <View style={{
+                            flex: 1,
+                            backgroundColor: "#222",
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+
+                            <Text style={{
+                                color: '#444', fontSize: 40, fontWeight: '800'
+                            }}>
+                                {project.repoName?.charAt(0).toUpperCase()}
+                            </Text>
+
+
+                        </View>
+
+                    )}
+
+
+                    {/*Visibility Badge */}
+                    <View style={{
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        paddingHorizontal: 10,
+                        paddingVertical: 5,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(0,0,0,0.6)',
+                    }}>
+                        <View
+                            style={{
+                                backgroundColor: project.isPublic ? "#10b981" : "#ef4444",
+                                borderRadius: 999,
+                                width: 6,
+                                height: 6,
+                            }}
+                        />
+                        <Text style={{
+                            color: 'white', fontSize: 11, fontWeight: '700', marginLeft: 5
+                        }}>{project.isPublic ? "Public" : "Private"}</Text>
 
                     </View>
 
-                )}
-
-
-
-                {/*Visibility Badge */}
-                <View style={{
-                    position: 'absolute',
-                    top: 12,
-                    right: 12,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingHorizontal: 10,
-                    paddingVertical: 5,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(0,0,0,0.6)',
-                }}>
-                    <View
-                        style={{
-                            backgroundColor: project.isPublic ? "#10b981" : "#ef4444",
-                            borderRadius: 999,
-                            width: 6,
-                            height: 6,
-                        }}
-                    />
-                    <Text style={{
-                        color: 'white', fontSize: 11, fontWeight: '700', marginLeft: 5
-                    }}>{project.isPublic ? "Public" : "Private"}</Text>
 
                 </View>
 
 
-
-
-
-            </View>
-
-
-
-            {/*  Project Information  */}
-            <View>
-                <Text style={{
-                        letterSpacing:1,
-                        color:"#717682",
-                        fontSize:18,
-                        fontWeight:"600",
-                        marginTop:10
+                {/*  Project Information  */}
+                <View>
+                    <Text style={{
+                        letterSpacing: 1,
+                        color: "#717682",
+                        fontSize: 18,
+                        fontWeight: "600",
+                        marginTop: 10
 
                     }}>ABOUT</Text>
-                <Text style={{
-                    letterSpacing:1,
-                    color:"#717682",
-                    fontSize:14,
-                    fontWeight:"400",
-                    marginTop:7
+                    <Text style={{
+                        letterSpacing: 1,
+                        color: "#717682",
+                        fontSize: 14,
+                        fontWeight: "400",
+                        marginTop: 7
 
-                }}>{project.description || "No Description is Provided"} </Text>
+                    }}>{project.description || "No Description is Provided"} </Text>
 
-                {/* TAGS */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[ { marginVertical: 12,flexDirection: "row", flexWrap: "wrap", gap: 8,  }]}>
-                    {project.tags?.map((tag:string) => (
-                        <View key={tag} style={{
-                            backgroundColor: "rgba(255,255,255,0.05)",
-                            paddingHorizontal: 12,
-                            paddingVertical: 6,
-                            borderRadius: 10,
-                            borderWidth: 1,
-                            borderColor: "rgba(136,136,136,0.5)"
-                        }}>
-                            <Text style={{ color: '#999', fontSize: 13 }}>#{tag} </Text>
+                    {/* TAGS */}
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[{
+                        marginVertical: 12,
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                        gap: 8,
+                    }]}>
+                        {project.tags?.map((tag: string) => (
+                            <View key={tag} style={{
+                                backgroundColor: "rgba(255,255,255,0.05)",
+                                paddingHorizontal: 12,
+                                paddingVertical: 6,
+                                borderRadius: 10,
+                                borderWidth: 1,
+                                borderColor: "rgba(136,136,136,0.5)"
+                            }}>
+                                <Text style={{color: '#999', fontSize: 13}}>#{tag} </Text>
+                            </View>
+                        ))}
+                    </ScrollView>
+
+                    <TouchableOpacity
+                        onPress={() => {
+                            Linking.openURL(project.repoUrl)
+                        }}
+                        activeOpacity={0.7}
+                        style={{
+                            backgroundColor: "white",
+                            borderRadius: 16,
+                            padding: 7,
+                        }}
+                    >
+                        <View style={{flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 7}}>
+                            <Ionicons name={"logo-github"} color={"black"} size={24}/>
+                            <Text style={{
+                                letterSpacing: 0.7,
+                                color: "black",
+                                fontSize: 15,
+                                fontWeight: "600"
+                            }}>View Repository</Text>
                         </View>
-                    ))}
-                </ScrollView>
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                onPress={()=>{
-                    Linking.openURL(project.repoUrl)
-                }}
-                activeOpacity={0.7}
-                style={{
-                    backgroundColor:"white",
-                    borderRadius:16,
-                    padding:7,
-                }}
-                >
-                    <View style={{flexDirection:"row",justifyContent:"center", alignItems:"center", gap:7}}>
-                        <Ionicons name={"logo-github"} color={"black"} size={24}/>
-                        <Text style={{
-                            letterSpacing:0.7,
-                            color:"black",
-                            fontSize:15,
-                            fontWeight:"600"
-                        }}>View Repository</Text>
+
+                </View>
+
+
+                {/*  Tabs Selection  */}
+                <View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        backgroundColor: '#111',
+                        padding: 4,
+                        borderRadius: 14,
+                        marginVertical: 12,
+                    }}>
+                        {['Stats', 'About', 'Request'].map((tab) => {
+                            const isSelected = selectedTab === tab
+                            return (
+                                <TouchableOpacity
+                                    key={tab}
+                                    onPress={() => {
+
+
+                                        setSelectedTab(tab)
+
+                                    }}
+                                    style={[{
+                                        flex: 1,
+                                        paddingVertical: 10,
+                                        alignItems: 'center',
+                                        borderRadius: 10
+                                    }, isSelected && {backgroundColor: '#1A1A1A', borderWidth: 1, borderColor: '#333'}]}
+                                >
+                                    <Text style={[{
+                                        color: '#666',
+                                        fontWeight: '600'
+                                    }, isSelected && {color: "white"}]}>{tab}</Text>
+                                </TouchableOpacity>
+                            )
+                        })}
                     </View>
-                </TouchableOpacity>
+
+                </View>
 
 
+                {/*  Tabs Screen   */}
+                {selectedTab === "Stats" && (
+                    <ProjectStatsTabScreen
+                        projectData={project}
+                        mode={mode}
+                        health={health}
+                        languages={languages}
+                        openIssue={() => {
+                            console.log("Opened Issue");
+                        }
+                        }
+                        openPr={() => {
+                            console.log("Opened Pr");
+                        }
+                        }
+                        stopNavigation={() => {
+                            console.log("StopNavigation");
+                        }
+                        }
+                        openHealth={() => {
+                            console.log("Opened Health");
+                        }
+                        }
+                        openCommits={() => {
+                            onCommits()
+                        }
+                        }
+                        handleRequestJoin={() => {
+                            console.log("Handle Request Join");
+                        }
+                        }
+                    />
 
-            </View>
+                )}
 
-
-
-            {/*  Tabs Selection  */}
-            <View>
-
-            <View style={{
-                flexDirection: 'row',
-                backgroundColor: '#111',
-                padding: 4,
-                borderRadius: 14,
-                marginVertical: 12,}}>
-                {['Stats', 'About', 'Request'].map((tab) => {
-                    const isSelected = selectedTab === tab
-                    return (
-                        <TouchableOpacity
-                            key={tab}
-                            onPress={() => {
-
-
-                                    setSelectedTab(tab)
-
-                            }}
-                            style={[{flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10}, isSelected && {backgroundColor: '#1A1A1A', borderWidth: 1, borderColor: '#333' }]}
-                        >
-                            <Text style={[{color: '#666', fontWeight: '600'}, isSelected && {color:"white"}]}>{tab}</Text>
-                        </TouchableOpacity>
-                    )
-                })}
-            </View>
-
-            </View>
-
-
-            {/*  Tabs Screen   */}
-            {selectedTab === "Stats" && (
-                <ProjectStatsTabScreen
-                    projectData={project}
-                    mode={mode}
-                    health={health}
-                    languages={languages}
-                    openIssue={()=>{
-                        console.log("Opened Issue");
-                    }
-                    }
-                    openPr={()=>{
-                        console.log("Opened Pr");
-                    }
-                    }
-                    stopNavigation={()=>{
-                        console.log("StopNavigation");
-                    }
-                    }
-                    openHealth={()=>{
-                        console.log("Opened Health");
-                    }
-                    }
-                    openCommits={()=>{
-                        console.log("Opened Commmits");
-                    }
-                    }
-                    handleRequestJoin={()=>{
-                        console.log("Handle Request Join");
-                    }
-                    }
-                />
-
-            )}
-
-            {selectedTab === "About" && (
-               <ProjectAboutTabScreen/>
-            )}
+                {selectedTab === "About" && (
+                    <ProjectAboutTabScreen/>
+                )}
 
 
-            {selectedTab === "Request" && (
-                <Text style={{
-                    color:"white",
-                    fontSize:15,
-                    letterSpacing:1,
-                }}
-                >Selected Tab Request</Text>
+                {selectedTab === "Request" && (
+                    <Text style={{
+                        color: "white",
+                        fontSize: 15,
+                        letterSpacing: 1,
+                    }}
+                    >Selected Tab Request</Text>
 
-            )}
+                )}
 
 
-        </ScrollView>
+            </ScrollView>
 
-    </View>
-  );
+        </View>
+    );
 };
 
 export default ProjectLayoutScreen;
