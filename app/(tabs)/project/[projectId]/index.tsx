@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {View, Text} from 'react-native';
 import {router, useLocalSearchParams} from "expo-router";
 import {ProjectProvider} from "@/src/FeaturesScreens/ProjectScreens/ProjectProvider";
@@ -7,6 +7,8 @@ import {Id} from "@/convex/_generated/dataModel";
 
 const Index = () => {
     const {projectId} = useLocalSearchParams()
+
+    const  [openProjectHealthDialog, setOpenProjectHealthDialog] = useState(false);
 
     return (
         <ProjectProvider projectId={projectId as Id<"projects">} mode={"admin"}>
@@ -27,8 +29,8 @@ const Index = () => {
                     router.push(`/project/${projectId}/requestScreen`)
 
                 }}
-                onOpenHealth={() => {
-
+                onOpenHealth={(check) => {
+                        setOpenProjectHealthDialog(check)
                 }}
                 onOpenEditAbout={(about) => {
                     router.push({
@@ -38,6 +40,7 @@ const Index = () => {
 
                 }}
             />
+
         </ProjectProvider>
     )
 

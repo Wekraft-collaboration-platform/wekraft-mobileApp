@@ -7,20 +7,23 @@ import ProjectStatsTabScreen from "@/components/TabScreens/projectStatsTabScreen
 import ProjectAboutTabScreen from "@/components/TabScreens/projectAboutTabScreen"
 import {useGithubProjectHealth} from "@/queries/project/useGithubProjectHealth";
 import {useGithubLanguages} from "@/queries/project/useGithubLanguages";
+import ProjectHealthBreakdownDialog from "@/components/Dialogs/projectHealthBreakdownDialog";
 
 
 type ProjectLayoutScreenProps = {
     onCommits: () => void;
     onPr: () => void;
-    onOpenHealth: () => void;
+    // onOpenHealth: (check : boolean) => void;
     onOpenIssue: () => void;
     onOpenEditAbout : (about : string) => void;
     onRequestOpen : ( ) => void;
 }
-const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue,onOpenEditAbout,onRequestOpen}: ProjectLayoutScreenProps) => {
+const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onRequestOpen}: ProjectLayoutScreenProps) => {
     const {project, mode} = useProject()
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
     const [stopNav, setStopNav] = useState<boolean>(false)
+    const [projectHealthShow, setProjectHealthShow] = useState<boolean>(false)
+
 
     const {
         data: health,
@@ -326,7 +329,7 @@ const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue,onOpenEd
                         }
                         }
                         openHealth={() => {
-                            onOpenHealth()
+                            setProjectHealthShow(true)
                         }
                         }
                         openCommits={() => {
@@ -357,20 +360,17 @@ const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue,onOpenEd
                     />
                 )}
 
-
-                {selectedTab === "Request" && (
-                    <Text style={{
-                        color: "white",
-                        fontSize: 15,
-                        letterSpacing: 1,
-                    }}
-                    >Selected Tab Request</Text>
-
-                )}
-
-
             </ScrollView>
 
+
+
+            {project.healthScore && (
+                <ProjectHealthBreakdownDialog
+                    visible={projectHealthShow}
+                    onClose={() => setProjectHealthShow(false)}
+                    healthScore={project.healthScore}
+                />
+            )}
 
         {stopNav && (
             <View style={{
