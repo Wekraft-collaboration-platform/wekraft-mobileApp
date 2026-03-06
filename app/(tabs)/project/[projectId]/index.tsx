@@ -26,6 +26,13 @@ const Index = () => {
                 onOpenHealth={() => {
 
                 }}
+                onOpenEditAbout={(about) => {
+                    router.push({
+                        pathname:`/project/${projectId}/editAboutScreen`,
+                        params: { projectId, about }
+                    })
+
+                }}
             />
         </ProjectProvider>
     )

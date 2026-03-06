@@ -14,8 +14,9 @@ type ProjectLayoutScreenProps = {
     onPr: () => void;
     onOpenHealth: () => void;
     onOpenIssue: () => void;
+    onOpenEditAbout : (about : string) => void;
 }
-const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue}: ProjectLayoutScreenProps) => {
+const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue,onOpenEditAbout}: ProjectLayoutScreenProps) => {
     const {project, mode} = useProject()
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
     const [stopNav, setStopNav] = useState<boolean>(false)
@@ -338,11 +339,12 @@ const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue}: Projec
                         about={project.about}
                         repo={project.repoName}
                         owner={project.repoOwner}
-                        onEdit={()=>{
 
-                        }}
                         stopNavigation={(check)=>{
                             setStopNav(check)
+                        }}
+                        openEditAbout={()=>{
+                            onOpenEditAbout(project.about)
                         }}
 
                     />

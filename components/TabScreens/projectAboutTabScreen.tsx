@@ -9,7 +9,17 @@ import Toast from "react-native-toast-message";
 import  {useGetProjectReadme} from "@/queries/project/useGetProjectReadme";
 import {useProject} from "@/src/FeaturesScreens/ProjectScreens/ProjectProvider";
 
-const ProjectAboutTabScreen = ({about,onEdit,repo,owner,stopNavigation}:{about:any,repo:string,owner:string,onEdit:()=>void,stopNavigation:(stop:boolean)=>void}) => {
+
+
+type ProjectProviderProps = {
+    about:any,
+    repo:string,
+    owner:string,
+    openEditAbout:()=>void,
+    stopNavigation:(stop:boolean)=>void
+}
+
+const ProjectAboutTabScreen = ({about,openEditAbout,repo,owner,stopNavigation,}:ProjectProviderProps) => {
     // const {projectId} = useLocalSearchParams()
     const {projectId,mode} = useProject()
     const updateProject = useMutation(api.projects.updateProject)
@@ -80,7 +90,7 @@ const ProjectAboutTabScreen = ({about,onEdit,repo,owner,stopNavigation}:{about:a
                                   disabled={disable}
                                   onPress={()=>{
                                       console.log("edit")
-                                      onEdit();
+                                      openEditAbout()
 
                                   }}
                 >
