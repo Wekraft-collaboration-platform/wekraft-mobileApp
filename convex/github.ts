@@ -915,3 +915,48 @@ export const getProjectIssue = action({
     return issues.filter(issue => !issue.pull_request)
   }
 })
+
+
+
+//    Get Readme Content
+
+
+export const getReadme = action({
+  args:{
+    owner:v.string(),
+    repo:v.string(),
+  },
+  handler : async(ctx,args) =>{
+    const identity = await ctx.auth.getUserIdentity()
+    if(!identity){
+      throw new Error("Call getReame WithOuy Auth")
+    }
+    const token = await ensureGithubToken(ctx)
+    if(!token) {
+      throw  new Error("Call getReadMe without Token")
+    }
+
+    const octokit = new Octokit({ auth: token });
+
+    try {
+      const { data } = await octokit.rest.repos.getReadme({
+        owner:args.owner,
+        repo:args.repo,
+        mediaType: {
+          format: "raw",
+        },
+      });
+
+      console.log("✅ README fetched successfully");
+      return data as unknown as string;
+    } catch (error) {
+      console.error("❌ Error fetching README:", error);
+      // If README doesn't exist, GitHub API returns 404
+      return null;
+    }
+
+
+
+  }
+})
+

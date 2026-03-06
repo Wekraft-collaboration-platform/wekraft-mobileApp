@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, ScrollView, Image, Linking} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, Image, Linking, ActivityIndicator} from 'react-native';
 import {useProject} from "@/src/FeaturesScreens/ProjectScreens/ProjectProvider";
 import {Ionicons} from "@expo/vector-icons";
 import {router} from "expo-router";
@@ -18,6 +18,7 @@ type ProjectLayoutScreenProps = {
 const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue}: ProjectLayoutScreenProps) => {
     const {project, mode} = useProject()
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
+    const [stopNav, setStopNav] = useState<boolean>(false)
 
     const {
         data: health,
@@ -312,8 +313,8 @@ const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue}: Projec
                             onPr()
                         }
                         }
-                        stopNavigation={() => {
-                            console.log("StopNavigation");
+                        stopNavigation={(check) => {
+                            setStopNav(check)
                         }
                         }
                         openHealth={() => {
@@ -333,7 +334,18 @@ const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue}: Projec
                 )}
 
                 {selectedTab === "About" && (
-                    <ProjectAboutTabScreen/>
+                    <ProjectAboutTabScreen
+                        about={project.about}
+                        repo={project.repoName}
+                        owner={project.repoOwner}
+                        onEdit={()=>{
+
+                        }}
+                        stopNavigation={(check)=>{
+                            setStopNav(check)
+                        }}
+
+                    />
                 )}
 
 
@@ -350,7 +362,26 @@ const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue}: Projec
 
             </ScrollView>
 
+
+        {stopNav && (
+            <View style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 101,
+                backgroundColor: "rgba(0,0,0,0.6)",
+                justifyContent: "center",
+                alignItems: "center"
+
+            }}>
+                <ActivityIndicator size={"large"} color={"white"}/>
+            </View>
+        )}
         </View>
+
+
     );
 };
 
