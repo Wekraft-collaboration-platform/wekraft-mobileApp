@@ -151,8 +151,26 @@ export default defineSchema({
     .index("by_repository", ["repositoryId"])
     .index("by_public", ["isPublic"]), // For discovering public projects
 
-  // ====================
-  //  projectMembers: defineTable({
-  // projectId: v.id("projects"),
-  // userId: v.id("users"),
+  // ==============================
+  // projectJoinRequests
+  // ==============================
+  projectJoinRequests: defineTable({
+    projectId: v.id("projects"),
+    userId: v.id("users"),
+    userName: v.string(), // for quick lookup
+    userImage: v.optional(v.string()), // for quick lookup
+    message: v.optional(v.string()), // "Hey, I want to contribute"
+    source: v.union(v.literal("invited"), v.literal("manual")),
+
+    status: v.union(
+        v.literal("pending"),
+        v.literal("accepted"),
+        v.literal("rejected"),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(), // whenever status changes
+  })
+      .index("by_project", ["projectId"])
+      .index("by_user", ["userId"])
+      .index("by_status", ["status"]),
 });

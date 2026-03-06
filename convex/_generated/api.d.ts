@@ -10,6 +10,7 @@
 
 import type * as github from "../github.js";
 import type * as githubHelper from "../githubHelper.js";
+import type * as projectRequests from "../projectRequests.js";
 import type * as projecthealth from "../projecthealth.js";
 import type * as projecthealthhelper from "../projecthealthhelper.js";
 import type * as projects from "../projects.js";
@@ -26,6 +27,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   github: typeof github;
   githubHelper: typeof githubHelper;
+  projectRequests: typeof projectRequests;
   projecthealth: typeof projecthealth;
   projecthealthhelper: typeof projecthealthhelper;
   projects: typeof projects;

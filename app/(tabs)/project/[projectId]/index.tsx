@@ -23,6 +23,10 @@ const Index = () => {
                     router.push(`/project/${projectId}/issueScreen`)
 
                 }}
+                onRequestOpen={() => {
+                    router.push(`/project/${projectId}/requestScreen`)
+
+                }}
                 onOpenHealth={() => {
 
                 }}

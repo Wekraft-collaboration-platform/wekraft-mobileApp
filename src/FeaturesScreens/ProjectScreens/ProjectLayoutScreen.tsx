@@ -15,8 +15,9 @@ type ProjectLayoutScreenProps = {
     onOpenHealth: () => void;
     onOpenIssue: () => void;
     onOpenEditAbout : (about : string) => void;
+    onRequestOpen : ( ) => void;
 }
-const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue,onOpenEditAbout}: ProjectLayoutScreenProps) => {
+const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue,onOpenEditAbout,onRequestOpen}: ProjectLayoutScreenProps) => {
     const {project, mode} = useProject()
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
     const [stopNav, setStopNav] = useState<boolean>(false)
@@ -276,8 +277,14 @@ const ProjectLayoutScreen = ({onCommits, onPr,onOpenHealth, onOpenIssue,onOpenEd
                                     key={tab}
                                     onPress={() => {
 
-
+                                        if(tab === 'Request') {
+                                            onRequestOpen()
+                                        }
+                                        else
                                         setSelectedTab(tab)
+
+
+
 
                                     }}
                                     style={[{
