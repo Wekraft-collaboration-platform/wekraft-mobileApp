@@ -105,6 +105,40 @@ const Project = () => {
 
             </View>
 
+
+            <TouchableOpacity
+                className='absolute bottom-5 right-0 self-start rounded-full bg-white p-3'
+                onPress={()=>{
+                    console.log("Projects : " + Projects.length)
+                    console.log("user Data : ",user?.limit)
+                    if(Projects.length >= user?.limit || 0){
+                        // Toast.show({
+                        //   type: "error",
+                        //   visibilityTime: 2000,
+                        //   position: "bottom",
+                        //   text1: "Limit Exceeded",
+                        //   text2: "You have reached the maximum limit of projects",
+                        // })
+                        // setShowUpgradeModal(true)
+                        // return
+
+                    }else{
+                        router.push("/project/addNewProject")
+                    }
+
+
+                }}
+            >
+                <View className='flex-row items-center gap-3 '>
+                    <Ionicons name='add' size={24} color='black'/>
+                    <Text className='text-black font-semibold'>New Project</Text>
+
+                </View>
+
+
+
+            </TouchableOpacity>
+
             <ProjectOptionsDialog
                 visible={projectOptionsVisible}
                 onClick={(mode)=>{

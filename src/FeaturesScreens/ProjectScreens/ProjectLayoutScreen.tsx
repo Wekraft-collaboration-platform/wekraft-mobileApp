@@ -97,6 +97,14 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
     }
 
     return (
+
+        <View
+        style={{
+            flex:1,
+        }}
+        >
+
+
         <View
             style={{
                 flex: 1,
@@ -432,30 +440,35 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                 ProjectName={project.projectName || ""}
             />
 
-        {(stopNav || deleteLoading) && (
-            <View style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 101,
-                backgroundColor: "rgba(0,0,0,0.6)",
-                justifyContent: "center",
-                alignItems: "center"
 
-            }}>
-                {deleteLoading && (
-                    <Text style={{
-                        letterSpacing:1,
-                        fontSize:18,
-                        marginBottom:10,
-                    }}>Deleting the Project....</Text>
-                )}
-                <ActivityIndicator size={"large"} color={"white"}/>
-            </View>
-        )}
         </View>
+
+            {(stopNav || deleteLoading) && (
+                <View style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 101,
+                    backgroundColor: "rgba(0,0,0,0.6)",
+                    justifyContent: "center",
+                    alignItems: "center"
+
+                }}>
+                    {deleteLoading && (
+                        <Text style={{
+                            letterSpacing:1,
+                            fontSize:18,
+                            marginBottom:10,
+                        }}>Deleting the Project....</Text>
+                    )}
+                    <ActivityIndicator size={"large"} color={"white"}/>
+                </View>
+            )}
+
+        </View>
+
 
 
     );

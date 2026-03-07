@@ -7,7 +7,7 @@ export const useGetUserProjects = (owner:string, clerkId:any) => {
     const getProjects = ConvexQuerry(api.projects.getProjects)
 
     return useQuery({
-        queryKey:["projects"],
+        queryKey:["Usersprojects"],
         queryFn:  () => {
            return getProjects
         },

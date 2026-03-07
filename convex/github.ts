@@ -273,6 +273,62 @@ export const fetchGithubRepos = action({
   },
 });
 
+export const fetchAllGithubRepos = action({
+  args: {},
+  handler: async (ctx): Promise<GithubRepo[]> => {
+    const token = await ensureGithubToken(ctx);
+
+    let page = 1;
+    const allRepos: GithubRepo[] = [];
+
+    while (true) {
+      const res = await fetch(
+          `https://api.github.com/user/repos?per_page=100&page=${page}&affiliation=owner,collaborator,organization_member`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/vnd.github+json",
+            },
+          }
+      );
+
+      if (!res.ok) {
+        throw new Error("GitHub API request failed");
+      }
+
+      // console.log("GitHub API request success," res.json());
+
+      // const r = await res.json();
+      // console.log("GitHub API request success,");
+      const repos: GithubRepoRaw[] = await res.json();
+      if (repos.length === 0) break;
+
+      for (const repo of repos) {
+        allRepos.push({
+          id: repo.id,
+          name: repo.name,
+          full_name: repo.full_name,
+          private: repo.private,
+          html_url: repo.html_url,
+          ownerLogin: repo.owner.login,
+          ownerAvatar: repo.owner.avatar_url,
+          created_at: repo.created_at,
+          updated_at: repo.updated_at,
+          pushed_at: repo.pushed_at,
+          // description:repo.description
+        });
+      }
+
+      page++;
+    }
+
+    return allRepos;
+  },
+});
+
+
+
+
 type CommitNode = {
   committedDate: string;
 };

@@ -14,6 +14,18 @@ export const create = mutation({
     repoFullName: v.string(),
     repoOwner: v.string(),
     repoUrl: v.string(),
+    lookingForMembers: v.optional(
+        v.array(
+            v.object({
+              role: v.string(),
+              type: v.union(
+                  v.literal("casual"),
+                  v.literal("part-time"),
+                  v.literal("serious")
+              ),
+            })
+        )
+    ),
   },
   
   handler: async (ctx, args) => {
@@ -58,6 +70,7 @@ export const create = mutation({
       repoOwner: args.repoOwner,
       repoUrl: args.repoUrl,
       ownerId: user._id,
+      lookingForMembers: args.lookingForMembers,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });

@@ -498,8 +498,6 @@ const editProjectScreen = () => {
 
 
 
-
-
                     </View>
                 </ScrollView>
 
