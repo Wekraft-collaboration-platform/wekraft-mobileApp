@@ -175,3 +175,12 @@ export type GithubRepo = {
   pushed_at: string;
  
 };
+
+
+
+export type MemberType = "casual" | "part-time" | "serious";
+
+export type TeamMember = {
+  role: string;
+  type: MemberType;
+};

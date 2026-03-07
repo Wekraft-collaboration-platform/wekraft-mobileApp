@@ -20,7 +20,7 @@ type ProjectLayoutScreenProps = {
     onRequestOpen : ( ) => void;
 }
 const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onRequestOpen}: ProjectLayoutScreenProps) => {
-    const {project, mode} = useProject()
+    const {project,projectId, mode} = useProject()
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
     const [stopNav, setStopNav] = useState<boolean>(false)
     const [projectHealthShow, setProjectHealthShow] = useState<boolean>(false)
@@ -102,6 +102,10 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                             items={[
                                 {
                                     label: "Edit project", onPress: () => {
+                                        router.push({
+                                            pathname: `/project/${projectId}/editProjectScreen`,
+                                            params: { projectId },
+                                        })
                                     }
                                 },
                                 { label: "AI actions", onPress: () => { } },
