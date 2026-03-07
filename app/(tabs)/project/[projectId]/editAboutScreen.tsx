@@ -31,8 +31,14 @@ const editAboutScreen = () => {
     return (
         <View style={{
             flex:1,
-            marginHorizontal:16
         }}>
+            <View
+                style={{
+                    flex:1,
+                    marginHorizontal:16
+                }}
+            >
+
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
@@ -98,6 +104,7 @@ const editAboutScreen = () => {
                                 if(overLayout) return
                                 try {
                                     setOverLayout(true);
+
                                     await updateProject({
                                         about: aboutData,
                                         projectId: projectId as Id<"projects">
@@ -132,12 +139,14 @@ const editAboutScreen = () => {
                 </View>
             </KeyboardAvoidingView>
 
+        </View>
             {overLayout && (
                 <View style={styles.overLay}>
                     <ActivityIndicator size="large" color="#fff" />
                 </View>
             )}
         </View>
+
     );
 };
 

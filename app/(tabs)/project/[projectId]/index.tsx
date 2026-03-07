@@ -29,9 +29,6 @@ const Index = () => {
                     router.push(`/project/${projectId}/requestScreen`)
 
                 }}
-                onOpenHealth={(check) => {
-                        setOpenProjectHealthDialog(check)
-                }}
                 onOpenEditAbout={(about) => {
                     router.push({
                         pathname:`/project/${projectId}/editAboutScreen`,

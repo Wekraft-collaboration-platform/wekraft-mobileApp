@@ -7,7 +7,7 @@ import {api} from "@/convex/_generated/api";
 import {useLocalSearchParams} from "expo-router";
 import {Id} from "@/convex/_generated/dataModel";
 
-const AdminProjectHealthEmptyState = ({ stopNav }:{stopNav:(stop:boolean)=>void}) => {
+const AdminProjectHealthEmptyState = ({ stopNav }:{stopNav:()=>void}) => {
     const [disable,setDisable] = useState<boolean>(false);
     const {projectId} = useLocalSearchParams()
     const updateProject = useMutation(api.projects.updateProject)
@@ -37,50 +37,7 @@ const AdminProjectHealthEmptyState = ({ stopNav }:{stopNav:(stop:boolean)=>void}
 
                 <TouchableOpacity
                     style={styles.actionButton}
-                    onPress={ async ()=>{
-                        if(disable) return
-                        try {
-                            setDisable(true);
-                            stopNav(true)
-
-                            const score = await getScore({
-                                project: projectId as Id<"projects">
-                            })
-
-                            console.log(score)
-
-                            await updateProject({
-                                projectId: projectId as Id<"projects">,
-                                healthScore:score
-                            })
-
-
-
-                            Toast.show({
-                                type:"success",
-                                text1:"Success!",
-                                text2:"Project has been Health Updated successfully!",
-                                position:"bottom",
-                                visibilityTime:2000
-                            })
-
-
-                            stopNav(false)
-                            setDisable(false);
-
-                        }catch (error){
-                            Toast.show({
-                                type:"error",
-                                text1:"Something went wrong",
-                                text2:"try to fetch sometime later",
-                                position:"bottom",
-                                visibilityTime:2000
-                            })
-                            console.log(error)
-                            stopNav(false)
-                            setDisable(false);
-                        }
-                    }}
+                    onPress={()=>{stopNav()}}
                     activeOpacity={0.7}
                 >
                     <Heart size={18} color="#1e1e22" fill="#1e1e22" />

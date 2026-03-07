@@ -78,7 +78,7 @@ async function calculateMaintenanceQualityScore(
 
 export const getProjectHealthScore = action({
     args:{
-        project : v.id("projects")
+        projectId : v.id("projects")
     },
     handler : async(ctx,args)=>{
 
@@ -88,7 +88,7 @@ export const getProjectHealthScore = action({
         }
 
         const ProjectData = await ctx.runQuery(api.projects.getProjectById,{
-            projectId:args.project
+            projectId:args.projectId
         })
 
         if(!ProjectData){

@@ -8,12 +8,57 @@ import VelocityBreakdownDialog from "@/components/Dialogs/VelocityBreakdownDialo
 import LanguageListItem from "@/components/Helper/LanguageListItem"
 import AdminProjectHealthEmptyState from "@/components/EmptyStates/AdminProjectHealthEmptyState";
 import UserProjectHealthEmptyState from "@/components/EmptyStates/UserProjectHealthEmptyState";
+import {Id} from "@/convex/_generated/dataModel";
+import {useGetProjectHealthScore} from "@/queries/project/useGetProjectHealthScore";
+import Toast from "react-native-toast-message";
+import {api} from "@/convex/_generated/api";
+import {useMutation} from "convex/react";
 
 const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,stopNavigation,openHealth,openCommits,mode,handleRequestJoin} :
                                {mode:String,projectData:any,health:any,languages:any,openIssue:()=>void,openPr:()=>void,stopNavigation:(stop:boolean)=>void,openHealth:()=>void,openCommits:()=>void,handleRequestJoin: (role:string)=>void}) => {
 
 
     const [open, setOpen] = useState(false);
+
+    const updateProject = useMutation(api.projects.updateProject)
+    const getScore = useGetProjectHealthScore(projectData._id)
+
+    const handleHealthScroe = async ()=>{
+
+        try {
+
+            stopNavigation(true)
+
+            const { data: score } = await getScore.refetch()
+
+            await updateProject({
+                projectId: projectData._id as Id<"projects">,
+                healthScore:score
+            })
+
+            Toast.show({
+                type:"success",
+                text1:"Success!",
+                text2:"Project has been Health Updated successfully!",
+                position:"bottom",
+                visibilityTime:2000
+            })
+
+            stopNavigation(false)
+
+        }catch (error){
+            Toast.show({
+                type:"error",
+                text1:"Something went wrong",
+                text2:"try to fetch sometime later",
+                position:"bottom",
+                visibilityTime:2000
+            })
+            console.log(error)
+            stopNavigation(false)
+        }
+
+    }
 
     const isVisible = useMemo(() => {
         const dateStr = projectData?.healthScore?.lastCalculatedDate;
@@ -51,8 +96,7 @@ const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,st
                         mode={mode}
                         visibleRefresh={isVisible}
                         reFresh={()=>{
-                            stopNavigation(false)
-
+                            handleHealthScroe()
                         }}
                     />
                 </View>
@@ -61,9 +105,9 @@ const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,st
 
 
                 mode === "admin" ? (
-                    <AdminProjectHealthEmptyState stopNav={(stop) =>
+                    <AdminProjectHealthEmptyState stopNav={() =>
                     {
-                        stopNavigation(stop)
+                        handleHealthScroe()
                     }
                     } />
                 ):(
