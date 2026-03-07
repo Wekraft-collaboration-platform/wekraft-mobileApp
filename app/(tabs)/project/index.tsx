@@ -1,19 +1,69 @@
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, FlatList, Image} from 'react-native';
-import {useQuery} from "convex/react";
+import {View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator} from 'react-native';
+import {useMutation, useQuery} from "convex/react";
 import {api} from "@/convex/_generated/api";
 import {Ionicons} from "@expo/vector-icons";
 import {formatRelativeTime} from "@/components/Helper/helper";
-// import {useSafeState} from "@clerk/clerk-js/dist/types/ui/hooks";
-import projectOptionsDialog from "@/components/Dialogs/projectOptionsDialog";
 import ProjectOptionsDialog from "@/components/Dialogs/projectOptionsDialog";
 import {router} from "expo-router";
+import {Id} from "@/convex/_generated/dataModel";
+import DeleteProjectAlertDialog from "@/components/Dialogs/DeleteProjectAlertDialog";
+import Toast from "react-native-toast-message";
 
 const Project = () => {
 
     const user = useQuery(api.users.getCurrentUser)
     const Projects = useQuery(api.projects.getProjects)
     const [projectOptionsVisible, setProjectOptionsVisible] = useState<boolean>(false)
+    const [selectedProject, setSelectedProject] = useState<any>("");
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+    const deleteRepo = useMutation(api.repos.deleteRepo)
+    const deleteProject = useMutation(api.projects.deleteProject)
+    const [deleteLoading, setDeleteLoading] = useState(false)
+
+
+    const handleDelete = async () => {
+        if (!selectedProject || !selectedProject.repositoryId) {
+            Toast.show({
+                type: "error",
+                visibilityTime: 2000,
+                position: "bottom",
+                text1: "Error",
+                text2: "Something went wrong"
+            })
+            setDeleteLoading(false)
+            return
+        }
+
+        setDeleteLoading(true)
+
+        try {
+            await deleteRepo({ repoId : selectedProject.repositoryId as any })
+            await deleteProject({ projectId: selectedProject._id })
+            Toast.show({
+                type: "success",
+                visibilityTime: 2000,
+                position: "bottom",
+                text1: "Success",
+                text2: "Project deleted successfully"
+            })
+            setDeleteLoading(false)
+        } catch (error) {
+            console.log(error)
+            Toast.show({
+                type: "error",
+                visibilityTime: 2000,
+                text1: "Error",
+                text2: "Something went wrong"
+            })
+            setDeleteLoading(false)
+        }
+        setShowDeleteModal(false)
+        // router.back()
+    }
+
+
 
     if (Projects === undefined) {
         return (
@@ -23,7 +73,19 @@ const Project = () => {
         )
     }
 
+    const ProjectData = Projects.sort(
+        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    )
+
+
     return (
+        <View
+        style={{
+            flex:1,
+        }}
+        >
+
+
         <View style={{
             flex: 1,
             marginHorizontal: 16
@@ -79,7 +141,7 @@ const Project = () => {
 
 
                 <FlatList
-                    data={Projects}
+                    data={ProjectData}
                     keyExtractor={(item) => item._id}
                     renderItem={({item}) => (
 
@@ -90,6 +152,7 @@ const Project = () => {
                                router.push(`/project/${item._id}`)
                             }}
                             onLongPress={()=>{
+                                setSelectedProject(item);
                                 setProjectOptionsVisible(true)
 
                             }}
@@ -142,15 +205,66 @@ const Project = () => {
             <ProjectOptionsDialog
                 visible={projectOptionsVisible}
                 onClick={(mode)=>{
-                    console.log(mode);
+                    setProjectOptionsVisible(false)
+                    switch (mode) {
+                        case "Edit" :
+                            router.push({
+                                pathname: `/project/${selectedProject._id}/editProjectScreen`,
+                                params: { projectId: selectedProject._id },
+                            })
+                            break;
+                        case "Request":
+                            router.push({
+                                pathname: `/project/${selectedProject._id}/requestScreen`,
+                                params: { projectId: selectedProject._id },
+                            })
+                            break;
+                        case "Delete":
+                            setShowDeleteModal(true)
+                            break;
+
+
+                    }
                 }}
                 onClose={()=>{
                     setProjectOptionsVisible(false);
                 }}
             />
 
+            <DeleteProjectAlertDialog
+                visible={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onDelete={handleDelete}
+                ProjectName={selectedProject.projectName || ""}
+            />
+
 
         </View>
+            {deleteLoading && (
+                <View style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 151,
+                    backgroundColor: "rgba(0,0,0,0.6)",
+                    justifyContent: "center",
+                    alignItems: "center"
+
+                }}>
+
+                        <Text style={{
+                            letterSpacing:1,
+                            fontSize:18,
+                            marginBottom:10,
+                        }}>Deleting the Project....</Text>
+
+                    <ActivityIndicator size={"large"} color={"white"}/>
+                </View>
+            )}
+        </View>
+
     );
 };
 

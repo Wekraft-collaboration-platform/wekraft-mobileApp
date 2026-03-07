@@ -88,13 +88,16 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
     } = useGithubLanguages(project?.repoOwner as string, project?.repoName as string)
 
 
-    if (!project) {
+    if (!project || !health || !languages) {
         return (
             <View className={"flex-1 justify-center items-center"}>
                 <Text className={"text-white text-xl"}>Loading...</Text>
             </View>
         )
     }
+
+
+    console.log(health)
 
     return (
 
