@@ -9,6 +9,10 @@ import {useGithubProjectHealth} from "@/queries/project/useGithubProjectHealth";
 import {useGithubLanguages} from "@/queries/project/useGithubLanguages";
 import ProjectHealthBreakdownDialog from "@/components/Dialogs/projectHealthBreakdownDialog";
 import {AnchorMenu} from "@/components/Extras/AnchorMenu";
+import {useMutation} from "convex/react";
+import {api} from "@/convex/_generated/api";
+import Toast from "react-native-toast-message";
+import DeleteProjectAlertDialog from "@/components/Dialogs/DeleteProjectAlertDialog";
 
 
 type ProjectLayoutScreenProps = {
@@ -24,6 +28,54 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
     const [stopNav, setStopNav] = useState<boolean>(false)
     const [projectHealthShow, setProjectHealthShow] = useState<boolean>(false)
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+    const deleteRepo = useMutation(api.repos.deleteRepo)
+    const deleteProject = useMutation(api.projects.deleteProject)
+    const [deleteLoading, setDeleteLoading] = useState(false)
+
+
+
+    const handleDelete = async () => {
+        if (!project || !project.repositoryId) {
+            Toast.show({
+                type: "error",
+                visibilityTime: 2000,
+                position: "bottom",
+                text1: "Error",
+                text2: "Something went wrong"
+            })
+            setDeleteLoading(false)
+            return
+        }
+
+        setDeleteLoading(true)
+
+        try {
+            await deleteRepo({ repoId : project.repositoryId as any })
+            await deleteProject({ projectId: project._id })
+            Toast.show({
+                type: "success",
+                visibilityTime: 2000,
+                position: "bottom",
+                text1: "Success",
+                text2: "Project deleted successfully"
+            })
+            setDeleteLoading(false)
+        } catch (error) {
+            console.log(error)
+            Toast.show({
+                type: "error",
+                visibilityTime: 2000,
+                text1: "Error",
+                text2: "Something went wrong"
+            })
+            setDeleteLoading(false)
+        }
+        setShowDeleteModal(false)
+        router.back()
+    }
+
 
 
     const {
@@ -113,6 +165,7 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                                     label: "Delete project",
                                     danger: true,
                                     onPress: () => {
+                                        setShowDeleteModal(true)
 
                                     },
                                 },
@@ -364,8 +417,6 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
 
             </ScrollView>
 
-
-
             {project.healthScore && (
                 <ProjectHealthBreakdownDialog
                     visible={projectHealthShow}
@@ -374,7 +425,14 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                 />
             )}
 
-        {stopNav && (
+            <DeleteProjectAlertDialog
+                visible={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onDelete={handleDelete}
+                ProjectName={project.projectName || ""}
+            />
+
+        {(stopNav || deleteLoading) && (
             <View style={{
                 position: "absolute",
                 top: 0,
@@ -387,6 +445,13 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                 alignItems: "center"
 
             }}>
+                {deleteLoading && (
+                    <Text style={{
+                        letterSpacing:1,
+                        fontSize:18,
+                        marginBottom:10,
+                    }}>Deleting the Project....</Text>
+                )}
                 <ActivityIndicator size={"large"} color={"white"}/>
             </View>
         )}
