@@ -8,10 +8,11 @@ export function useGetProjectHealthScore(projectId: any) {
     return useQuery({
         queryKey:["ProjectHealthScore",projectId],
         queryFn : ()=>
-            getScore(projectId)
+            getScore({projectId})
         ,
-        enabled: Boolean(projectId),
-        retry :1
+        enabled : false,
+        // enabled: Boolean(projectId),
+        // retry :1
     })
 }
 

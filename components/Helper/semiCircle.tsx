@@ -38,7 +38,7 @@ const getArcPath = () => {
   return `M ${start.x} ${start.y} A ${radius} ${radius} 0 1 1 ${end.x} ${end.y}`;
 };
 
-export default function SemiCircle({ score = 87, openH ,reFresh,visibleRefresh = false,mode,}: { mode:String,score: number, openH: () => void , reFresh: () => void ,visibleRefresh:boolean}) {
+export default function SemiCircle({ score = 87, openH ,reFresh,visibleRefresh = false,mode,refreshScore,}: { mode:String,score: number, openH: () => void , reFresh: () => void ,visibleRefresh:boolean,refreshScore : ()=>void}) {
   const animatedValue = useRef(new Animated.Value(0)).current;
 
   // Logic for dynamic feedback
@@ -120,7 +120,13 @@ export default function SemiCircle({ score = 87, openH ,reFresh,visibleRefresh =
 
             {(visibleRefresh && mode==="admin") && (
 
-            <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.7}
+            onPress={()=>{
+              if(mode==="admin"){
+                refreshScore()
+              }
+            }}
+            >
               <Ionicons name="refresh" size={18} color={COLORS.textPrimary} />
               <Text style={[styles.primaryBtnText,{color: "white",marginStart:10}]}>Refresh Health Score</Text>
             </TouchableOpacity>

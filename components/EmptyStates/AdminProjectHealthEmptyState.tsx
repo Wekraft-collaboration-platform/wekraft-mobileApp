@@ -8,10 +8,6 @@ import {useLocalSearchParams} from "expo-router";
 import {Id} from "@/convex/_generated/dataModel";
 
 const AdminProjectHealthEmptyState = ({ stopNav }:{stopNav:()=>void}) => {
-    const [disable,setDisable] = useState<boolean>(false);
-    const {projectId} = useLocalSearchParams()
-    const updateProject = useMutation(api.projects.updateProject)
-    const getScore = useAction(api.projecthealth.getProjectHealthScore)
     return (
         <View style={styles.card}>
             {/* Background Decor (Subtle Grid or Shapes) */}

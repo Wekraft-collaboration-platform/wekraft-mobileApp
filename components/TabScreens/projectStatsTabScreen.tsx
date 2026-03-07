@@ -26,10 +26,20 @@ const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,st
     const handleHealthScroe = async ()=>{
 
         try {
+            if(!projectData._id) return
 
             stopNavigation(true)
 
+
             const { data: score } = await getScore.refetch()
+
+
+            console.log("Old Data")
+            console.log(projectData.healthScore)
+            console.log("New Data")
+            console.log(score)
+            console.log("Project Id")
+            console.log(projectData._id)
 
             await updateProject({
                 projectId: projectData._id as Id<"projects">,
@@ -92,6 +102,9 @@ const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,st
                         score={projectData?.healthScore?.totalScore}
                         openH={()=>{
                             openHealth()
+                        }}
+                        refreshScore={()=>{
+                            handleHealthScroe()
                         }}
                         mode={mode}
                         visibleRefresh={isVisible}
@@ -323,14 +336,14 @@ const VelocityCard = ({
                           velocityPrev7d,
                           velocityDelta,
                           velocityTrend,
-                          isFreashrepo,
+                          isFreshRepo,
                           onPress,
                       }: {
     velocity7d: number,
     velocityPrev7d: number,
     velocityDelta: number,
     velocityTrend: "up" | "down" | "flat" | "insufficient",
-    isFreashrepo: boolean,
+    isFreshRepo: boolean,
     onPress: () => void
 }) =>
 {

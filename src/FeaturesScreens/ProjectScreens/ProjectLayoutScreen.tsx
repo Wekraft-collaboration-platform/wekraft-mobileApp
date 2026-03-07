@@ -8,6 +8,7 @@ import ProjectAboutTabScreen from "@/components/TabScreens/projectAboutTabScreen
 import {useGithubProjectHealth} from "@/queries/project/useGithubProjectHealth";
 import {useGithubLanguages} from "@/queries/project/useGithubLanguages";
 import ProjectHealthBreakdownDialog from "@/components/Dialogs/projectHealthBreakdownDialog";
+import {AnchorMenu} from "@/components/Extras/AnchorMenu";
 
 
 type ProjectLayoutScreenProps = {
@@ -60,7 +61,6 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                     <TouchableOpacity
                         onPress={() => {
                             router.back()
-
                         }}
                         activeOpacity={0.7}
                         style={{
@@ -93,29 +93,27 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                     </View>
                     <View style={{flex: 1}}/>
 
+
+
+                    {/*Admin Mode*/}
                     {mode === "admin" && (
-                        <TouchableOpacity
-                            onPress={() => {
-                                // router.back()
+                        <AnchorMenu
+                            anchor={<Ionicons name="ellipsis-vertical-outline" size={32} color="white" />}
+                            items={[
+                                {
+                                    label: "Edit project", onPress: () => {
+                                    }
+                                },
+                                { label: "AI actions", onPress: () => { } },
+                                {
+                                    label: "Delete project",
+                                    danger: true,
+                                    onPress: () => {
 
-                            }}
-                            activeOpacity={0.7}
-                            style={{
-                                backgroundColor: "#1C1C1E",
-                                borderColor: "#2D2D2F",
-                                borderWidth: 2,
-                                borderRadius: 12,
-                                padding: 7,
-                            }}
-                        >
-
-                            <Ionicons
-                                name="ellipsis-vertical-outline"
-                                size={32}
-                                color="white"
-                                style={{transform: [{rotate: '90deg'}]}}
-                            />
-                        </TouchableOpacity>
+                                    },
+                                },
+                            ]}
+                        />
 
                     )}
 
