@@ -9,6 +9,7 @@ import {router} from "expo-router";
 import {Id} from "@/convex/_generated/dataModel";
 import DeleteProjectAlertDialog from "@/components/Dialogs/DeleteProjectAlertDialog";
 import Toast from "react-native-toast-message";
+import PlanUpgradeDialog from "@/components/Dialogs/PlanUpgradeDialog";
 
 const Project = () => {
 
@@ -21,6 +22,8 @@ const Project = () => {
     const deleteRepo = useMutation(api.repos.deleteRepo)
     const deleteProject = useMutation(api.projects.deleteProject)
     const [deleteLoading, setDeleteLoading] = useState(false)
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+
 
 
     const handleDelete = async () => {
@@ -174,7 +177,7 @@ const Project = () => {
                 onPress={()=>{
                     console.log("Projects : " + Projects.length)
                     console.log("user Data : ",user?.limit)
-                    if(Projects.length >= user?.limit || 0){
+                    if(Projects.length >= 1 || 0){
                         // Toast.show({
                         //   type: "error",
                         //   visibilityTime: 2000,
@@ -182,7 +185,7 @@ const Project = () => {
                         //   text1: "Limit Exceeded",
                         //   text2: "You have reached the maximum limit of projects",
                         // })
-                        // setShowUpgradeModal(true)
+                        setShowUpgradeModal(true)
                         // return
 
                     }else{
@@ -230,6 +233,12 @@ const Project = () => {
                     setProjectOptionsVisible(false);
                 }}
             />
+
+            <PlanUpgradeDialog
+                onDismiss={() => setShowUpgradeModal(false)}
+                onUpgrade={()=>{console.log("Upgrade")}}
+                limit={user?.limit}
+                visible={showUpgradeModal}/>
 
             <DeleteProjectAlertDialog
                 visible={showDeleteModal}
