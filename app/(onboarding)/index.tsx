@@ -8,6 +8,7 @@ import FetchingRepoSkeleton from "@/components/SkeletonLayout/FetchingRepoSkelet
 import { useOnboarding } from '@/context/OnBoardingContext'
 import Toast from 'react-native-toast-message'
 import { router } from 'expo-router'
+import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 
 
 const Index = () => {
@@ -17,6 +18,8 @@ const Index = () => {
   // const [data,setName] = useState("")
 
   return (
+      <LinearBackgroundProvider>
+
     <View style={style.container}>
       {/* Header and Body  Section */}
       <View style={style.headerContainer}>
@@ -136,6 +139,8 @@ const Index = () => {
       </TouchableOpacity>
 
     </View>
+      </LinearBackgroundProvider>
+
     )
   
 }
@@ -146,15 +151,14 @@ export default Index
 const style = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 48,
   },
   headerContainer: {
     flex: 1,
   },
   headerText: {
     fontSize: 24,
-    color: "#A8ACB0",
+    color: "white",
+    fontWeight: "bold",
     textAlign: "center"
   },
 

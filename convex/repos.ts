@@ -19,8 +19,8 @@ export const createRepository = mutation({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      .withIndex("by_clerkId", (q) =>
+        q.eq("clerkId", identity.subject)
       )
       .unique();
 
@@ -65,9 +65,9 @@ export const getRepository = query({
 
     const user = await ctx.db
       .query("users")
-        .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
-      )
+        .withIndex("by_clerkId", (q) =>
+            q.eq("clerkId", identity.subject)
+        )
       .unique();
 
     if (!user) {
@@ -98,9 +98,9 @@ export const deleteRepo = mutation({
 
     const user = await ctx.db
       .query("users")
-        .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
-      )
+        .withIndex("by_clerkId", (q) =>
+            q.eq("clerkId", identity.subject)
+        )
       .unique();
 
     if (!user) {

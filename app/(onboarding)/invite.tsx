@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useOnboarding } from '@/context/OnBoardingContext'
 import { FetchRepoColbarator } from "@/queries/repo/repoColbarator"
 import { uriToArrayBuffer, getContentType } from '@/components/Helper/helper'
+import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 const Invite = () => {
   // const completeOnBoarding = useMutation(api.users.completeOnboarding)
   const uploadThumbnial = useAction(api.thumbnail.uploadThumbnail)
@@ -23,6 +24,7 @@ const Invite = () => {
     error } = FetchRepoColbarator(data.selctedrepo?.ownerLogin!, data.selctedrepo?.name!)
 
   return (
+<LinearBackgroundProvider>
 
     <View
       className='flex-1'
@@ -187,13 +189,15 @@ const Invite = () => {
       </TouchableOpacity>
 
 
+    </View>
       {settingUp && (
         <View style={styles.LoadingForeGround}>
           <ActivityIndicator size={"large"} color={"white"} />
           <Text style={styles.LoadingText}>Setting up your project...</Text>
         </View>
       )}
-    </View>
+</LinearBackgroundProvider>
+
   )
 }
 
@@ -204,8 +208,6 @@ export default Invite
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 48,
   },
 
   header: {
@@ -233,7 +235,8 @@ const styles = StyleSheet.create({
 
   headerText: {
     fontSize: 24,
-    color: "#A8ACB0",
+    color: "white",
+    fontWeight: "bold",
     textAlign: "center"
   },
 
@@ -362,11 +365,6 @@ const styles = StyleSheet.create({
   },
 
   LoadingForeGround: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
     backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "center",
     alignItems: "center",
