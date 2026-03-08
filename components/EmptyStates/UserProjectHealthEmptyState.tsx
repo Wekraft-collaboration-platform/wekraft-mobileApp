@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
         padding: 28,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: '#3f3f46',
+        borderColor: '#27272a',
         position: 'relative',
         marginBottom: 16,
         minHeight: 300,

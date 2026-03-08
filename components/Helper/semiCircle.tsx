@@ -17,7 +17,7 @@ const arcLength = radius * angleLength;
 const COLORS = {
   bg: "#18181b",
   card: "#27272a",
-  border: "#3f3f46",
+  border: "#27272a",
   textPrimary: "#ffffff",
   textSecondary: "#a1a1aa",
   // Dynamic colors

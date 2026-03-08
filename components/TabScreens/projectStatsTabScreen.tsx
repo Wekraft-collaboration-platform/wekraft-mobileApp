@@ -13,6 +13,7 @@ import {useGetProjectHealthScore} from "@/queries/project/useGetProjectHealthSco
 import Toast from "react-native-toast-message";
 import {api} from "@/convex/_generated/api";
 import {useMutation} from "convex/react";
+import {useProject} from "@/src/FeaturesScreens/ProjectScreens/ProjectProvider";
 
 const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,stopNavigation,openHealth,openCommits,mode,handleRequestJoin} :
                                {mode:String,projectData:any,health:any,languages:any,openIssue:()=>void,openPr:()=>void,stopNavigation:(stop:boolean)=>void,openHealth:()=>void,openCommits:()=>void,handleRequestJoin: (role:string)=>void}) => {
@@ -196,89 +197,134 @@ const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,st
             </View>
 
 
-            {/* Team Roles */}
+            {/* Team Roles Container */}
             <View style={{
-                marginTop: 16,
-                flex: 1,
-                justifyContent: "center",
-                backgroundColor: "#18181b",
-                borderColor: "#3f3f46",
+                marginTop: 20,
+                backgroundColor: "#09090b",
+                borderColor: "#27272a",
                 borderWidth: 1,
-                borderRadius: 24,
-                padding: 16,
+                borderRadius: 16,
+                overflow: 'hidden'
             }}>
-
-                <View className="flex-row w-full items-center gap-4 ml-2">
-                    <TeamsIcon size={24} color="white" />
-                    <Text style={[styles.sectionHeader, { marginBottom: 0 }]}>
-                        Team & Roles
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: 16,
+                    gap: 10,
+                    backgroundColor: "#18181b", // Slight lift for the header
+                    borderBottomWidth: 1,
+                    borderBottomColor: "#27272a"
+                }}>
+                    <TeamsIcon size={20} color="#a1a1aa" />
+                    <Text style={{
+                        color: "white",
+                        fontSize: 16,
+                        fontWeight: "600",
+                        letterSpacing: -0.5
+                    }}>
+                        Project Team
                     </Text>
                 </View>
 
-                {projectData?.lookingForMembers?.length > 0 ? (
-                    <View className="mt-2">
-                        <View style={styles.divider} />
-                        <Text style={[styles.sectionHeader, { marginBottom: 10 }]}>
-                            Current Open Positions
-                        </Text>
+                <View style={{ padding :16,backgroundColor:"#18181b" }}>
+                    {projectData?.lookingForMembers?.length > 0 ? (
+                        <View>
+                            <Text style={{
+                                color: "#71717a",
+                                fontSize: 12,
+                                fontWeight: "700",
+                                textTransform: 'uppercase',
+                                letterSpacing: 1,
+                                marginBottom: 16
+                            }}>
+                                Open Positions
+                            </Text>
 
-                        {projectData.lookingForMembers?.map((member, index) => (
-                            <View key={index} className="flex-row justify-between items-center mb-4">
-                                <View className="flex-row gap-3 items-center">
-                                    <View style={{
-                                        backgroundColor: "#212222",
-                                        borderRadius: 999,
-                                        borderWidth: 1,
-                                        borderColor: "#3A3A3A",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        width: 48,
-                                        height: 48
-                                    }}>
-                                        <TeamsIcon size={24} color="white" />
-                                    </View>
-                                    <View>
-                                        <Text style={{ color: "white", fontSize: 14, fontWeight: "600" }}>
-                                            {member.role}
-                                        </Text>
-                                        <Text style={{ color: "#888", fontSize: 12 }}>
-                                            {member.type}
-                                        </Text>
-                                    </View>
-                                </View>
-
-                                {/* Request Button */}
-                                <TouchableOpacity
-                                    onPress={() => handleRequestJoin(member.role)}
+                            {projectData.lookingForMembers.map((member, index) => (
+                                <View
+                                    key={index}
                                     style={{
-                                        backgroundColor: "#3b82f6",
-                                        paddingHorizontal: 12,
-                                        paddingVertical: 6,
-                                        borderRadius: 12
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: 12,
+                                        backgroundColor: "#18181b",
+                                        borderRadius: 12,
+                                        borderWidth: 1,
+                                        borderColor: "#27272a",
+                                        marginBottom: 10
                                     }}
                                 >
-                                    <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>Request</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ))}
-                    </View>
-                ) : (
-                    <View style={styles.TeamRoles}>
-                        <TeamsIcon size={48} color="white" />
-                        <Text style={[styles.sectionHeader, { marginBottom: 0 }]}>
-                            No roles listed yet
-                        </Text>
-                    </View>
-                )}
+                                    <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+                                        <View style={{
+                                            backgroundColor: "#27272a",
+                                            borderRadius: 8,
+                                            width: 40,
+                                            height: 40,
+                                            justifyContent: "center",
+                                            alignItems: "center"
+                                        }}>
+                                            <TeamsIcon size={18} color="#3b82f6" />
+                                        </View>
+                                        <View>
+                                            <Text style={{ color: "#fafafa", fontSize: 14, fontWeight: "600" }}>
+                                                {member.role}
+                                            </Text>
+                                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#22c55e" }} />
+                                                <Text style={{ color: "#71717a", fontSize: 12 }}>
+                                                    {member.type}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
 
-                {/* LOCK OVERLAY */}
-                {!projectData?.isPublic && (
-                    <View style={styles.TeamRolesOverlay}>
-                        <Text style={[styles.sectionHeader, { fontSize: 14, fontWeight: "bold", textAlign: "center" }]}>
-                            Make the Project Public to enable this section
-                        </Text>
-                    </View>
-                )}
+
+                                    {mode === "user" && (
+
+                                    <TouchableOpacity
+                                        onPress={() => handleRequestJoin(member.role)}
+                                        activeOpacity={0.7}
+                                        style={{
+                                            backgroundColor: "white",
+                                            paddingHorizontal: 14,
+                                            paddingVertical: 8,
+                                            borderRadius: 8
+                                        }}
+                                    >
+                                        <Text style={{ color: "black", fontSize: 13, fontWeight: "600" }}>Apply</Text>
+                                    </TouchableOpacity>
+                                    )}
+                                </View>
+                            ))}
+                        </View>
+                    ) : (
+                        /* Enhanced Empty State */
+                        <View style={{
+                            paddingVertical: 40,
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <View style={{
+                                width: 60,
+                                height: 60,
+                                borderRadius: 30,
+                                backgroundColor: "#18181b",
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginBottom: 12,
+                                borderWidth: 1,
+                                borderStyle: 'dashed',
+                                borderColor: "#3f3f46"
+                            }}>
+                                <TeamsIcon size={28} color="#3f3f46" />
+                            </View>
+                            <Text style={{ color: "#a1a1aa", fontSize: 14, fontWeight: "500" }}>
+                                No roles currently listed
+                            </Text>
+                        </View>
+                    )}
+                </View>
             </View>
 
 
@@ -500,7 +546,7 @@ const styles = StyleSheet.create({
     metricCard: {
         width: "48%",
         backgroundColor: "#18181b",
-        borderColor: "#3f3f46",
+        borderColor: "#27272a",
         borderWidth: 1,
         borderRadius: 24,
         padding: 16,
@@ -542,7 +588,7 @@ const styles = StyleSheet.create({
 
     container: {
         marginTop: 16, flex: 1, backgroundColor: "#18181b",
-        borderColor: "#3f3f46", borderWidth: 1, borderRadius: 24, padding: 16,
+        borderColor: "#27272a", borderWidth: 1, borderRadius: 24, padding: 16,
     },
     listContainer: {
         paddingHorizontal: 8,

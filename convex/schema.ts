@@ -161,6 +161,7 @@ export default defineSchema({
     userImage: v.optional(v.string()), // for quick lookup
     message: v.optional(v.string()), // "Hey, I want to contribute"
     source: v.union(v.literal("invited"), v.literal("manual")),
+    role:v.optional(v.string()),
 
     status: v.union(
         v.literal("pending"),

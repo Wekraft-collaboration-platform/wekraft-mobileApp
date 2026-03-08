@@ -9,10 +9,12 @@ import {useGithubProjectHealth} from "@/queries/project/useGithubProjectHealth";
 import {useGithubLanguages} from "@/queries/project/useGithubLanguages";
 import ProjectHealthBreakdownDialog from "@/components/Dialogs/projectHealthBreakdownDialog";
 import {AnchorMenu} from "@/components/Extras/AnchorMenu";
-import {useMutation} from "convex/react";
+import {useMutation, useQuery} from "convex/react";
 import {api} from "@/convex/_generated/api";
 import Toast from "react-native-toast-message";
 import DeleteProjectAlertDialog from "@/components/Dialogs/DeleteProjectAlertDialog";
+import ApplyTeamProjectPositionDialog from "@/components/Dialogs/ApplyTeamProjectPositionDialog";
+import {useUser} from "@clerk/clerk-expo";
 
 
 type ProjectLayoutScreenProps = {
@@ -24,11 +26,20 @@ type ProjectLayoutScreenProps = {
     onRequestOpen : ( ) => void;
 }
 const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onRequestOpen}: ProjectLayoutScreenProps) => {
-    const {project,projectId, mode} = useProject()
+    const {project,projectId, mode,user} = useProject()
+    const { user : userData, isLoaded } = useUser();
+
+    const [role,setRole]=useState("")
+
+
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
     const [stopNav, setStopNav] = useState<boolean>(false)
     const [projectHealthShow, setProjectHealthShow] = useState<boolean>(false)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [showApplyModel, setShowApplyeModal] = useState(false)
+
+    const sendRequesst = useMutation(api.projectRequests.sendProjectRequest)
+
 
     const deleteRepo = useMutation(api.repos.deleteRepo)
     const deleteProject = useMutation(api.projects.deleteProject)
@@ -402,10 +413,11 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                             onCommits()
                         }
                         }
-                        handleRequestJoin={() => {
-                            console.log("Handle Request Join");
-                        }
-                        }
+                        handleRequestJoin={(role:string)=>{
+                            setRole(role)
+                            setShowApplyeModal(true)
+                        }}
+
                     />
 
                 )}
@@ -435,6 +447,59 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                     healthScore={project.healthScore}
                 />
             )}
+
+
+            <ApplyTeamProjectPositionDialog
+                visible={showApplyModel}
+                onClose={() => setShowApplyeModal(false)}
+                onSend={async (msg : string)=>{
+                    try {
+                        await sendRequesst({
+                            projectId,
+                            userId: user?._id,
+                            userName: userData?.username ?? "",
+                            userImage: userData?.imageUrl,
+                            message: msg,
+                            role:role
+                        })
+
+                        Toast.show({
+                            type: 'success',
+                            text1: "Requested Successfully",
+                            visibilityTime: 2000,
+                            position: 'bottom'
+                        })
+
+                        setShowApplyeModal(false)
+
+                    }
+                    catch (error:any) {
+                        console.log("Error : - " , error)
+                        if(error?.data === "Already Send") {
+                            Toast.show({
+                                type:"info",
+                                text1: "Already Send",
+                                visibilityTime: 2000,
+                                position: 'bottom'
+                            })
+                        }
+                        else {
+                            Toast.show({
+                                type:"error",
+                                text1: "Requested Failed",
+                                visibilityTime: 2000,
+                                position: 'bottom'
+                            })
+
+
+                        }
+                        setShowApplyeModal(false)
+                    }
+
+                }}
+                projectTitle={role ?? ""}
+            />
+
 
             <DeleteProjectAlertDialog
                 visible={showDeleteModal}

@@ -17,75 +17,102 @@ const formatRelativeTime = (date: number | string) => {
     if (diffInHours < 24) return `${diffInHours}h ago`;
     return `${Math.floor(diffInHours / 24)}d ago`;
 };
-
 const RequestCard = ({ item, index, onAccept, onReject }: any) => {
     const isPending = item.status === 'pending';
 
-    // UI mapping for status badges
     const statusConfig = {
-        pending: { text: 'New', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-        accepted: { text: 'Accepted', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-        rejected: { text: 'Declined', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
+        pending: { text: 'New Request', color: '#60a5fa', bg: '#172554', border: '#1e3a8a' },
+        accepted: { text: 'Joined', color: '#4ade80', bg: '#052e16', border: '#14532d' },
+        rejected: { text: 'Declined', color: '#f87171', bg: '#450a0a', border: '#7f1d1d' },
     };
 
     const config = statusConfig[item.status as keyof typeof statusConfig] || statusConfig.pending;
 
     return (
         <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: index * 100 }}
-            className="flex-row"
+            from={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'timing', duration: 400, delay: index * 80 }}
         >
-            <View className="flex-1 bg-neutral-900/60 border border-neutral-800/50 rounded-2xl p-4 mb-4">
-                <View className="flex-row items-center justify-between mb-3">
+            <View className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-4 shadow-xl">
+
+                {/* Top Row: Identity & Status */}
+                <View className="flex-row justify-between items-start mb-5">
                     <View className="flex-row items-center gap-3">
-                        <Image
-                            source={{ uri: item.userImage || 'https://avatar.iran.liara.run/public/30' }}
-                            className="w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700"
-                        />
+                        <View className="relative">
+                            <Image
+                                source={{ uri: item.userImage || 'https://avatar.iran.liara.run/public/30' }}
+                                className="w-12 h-12 rounded-2xl bg-zinc-800 border border-zinc-700"
+                            />
+                            {/* Small Online/Active Indicator */}
+                            <View className="absolute -bottom-1 -right-1 w-4 h-4 bg-zinc-900 rounded-full items-center justify-center">
+                                <View className="w-2.5 h-2.5 bg-emerald-500 rounded-full border border-zinc-900" />
+                            </View>
+                        </View>
+
                         <View>
-                            <Text className="text-white text-[15px] font-bold tracking-tight">
+                            <Text className="text-zinc-100 text-base font-semibold tracking-tight">
                                 {item.userName || "Collaborator"}
                             </Text>
-                            <Text className="text-neutral-500 text-[11px]">
-                                Requested {formatRelativeTime(item._creationTime)}
+                            <Text className="text-zinc-500 text-xs">
+                                {formatRelativeTime(item._creationTime)}
                             </Text>
                         </View>
                     </View>
-                    <View className={`${config.bg} ${config.border} px-2 py-1 rounded-md border`}>
-                        <Text className={`${config.color} text-[10px] font-bold uppercase tracking-widest`}>
+
+                    <View style={{ backgroundColor: config.bg, borderColor: config.border }} className="px-2.5 py-1 rounded-full border">
+                        <Text style={{ color: config.color }} className="text-[9px] font-black uppercase tracking-tighter">
                             {config.text}
                         </Text>
                     </View>
                 </View>
 
-                <Text className="text-neutral-400 text-sm leading-5 mb-4">
-                    {item.message || "I'd like to contribute to this project as a developer."}
-                </Text>
+                {/* Role Badge - Visual context for the owner */}
+                <View className="bg-zinc-950/50 self-start px-3 py-1.5 rounded-lg border border-zinc-800/50 mb-4 flex-row items-center gap-2">
+                    <View className="w-1 h-1 rounded-full bg-blue-500" />
+                    <Text className="text-zinc-400 text-[11px] font-medium uppercase tracking-widest">
+                        Applying for: <Text className="text-zinc-200">{item.role || "Developer"}</Text>
+                    </Text>
+                </View>
 
-                {/* Conditional Rendering: Show actions only if status is pending */}
-                {isPending && (
+                {/* Message Section */}
+                <View className="bg-zinc-800/30 rounded-2xl p-4 mb-5 border-l-2 border-zinc-700">
+                    <Text className="text-zinc-300 text-[13px] leading-5 italic">
+                        {item.message || "I'd like to contribute to this project as a developer."}
+                    </Text>
+                </View>
+
+                {/* Actions */}
+                {isPending ? (
                     <View className="flex-row gap-3">
                         <TouchableOpacity
-                            onPress={() => onAccept(item._id)}
-                            className="flex-1 bg-white h-10 rounded-xl items-center justify-center active:opacity-80"
-                        >
-                            <Text className="text-black font-bold text-sm">Accept</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
                             onPress={() => onReject(item._id)}
-                            className="flex-1 bg-neutral-800 border border-neutral-700 h-10 rounded-xl items-center justify-center active:opacity-70"
+                            className="flex-1 bg-zinc-800 h-12 rounded-2xl items-center justify-center border border-zinc-700 active:bg-zinc-700"
                         >
-                            <Text className="text-neutral-300 font-bold text-sm">Decline</Text>
+                            <Text className="text-zinc-300 font-bold text-sm">Decline</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => onAccept(item._id)}
+                            className="flex-[2] bg-white h-12 rounded-2xl items-center justify-center shadow-lg shadow-white/5 active:opacity-90"
+                        >
+                            <View className="flex-row items-center gap-2">
+                                <Text className="text-black font-bold text-sm">Accept Request</Text>
+                            </View>
                         </TouchableOpacity>
                     </View>
+                ) : (
+                    <TouchableOpacity
+                        className="w-full py-3 items-center justify-center border border-dashed border-zinc-800 rounded-2xl"
+                        disabled
+                    >
+                        <Text className="text-zinc-600 text-xs font-medium">No further actions required</Text>
+                    </TouchableOpacity>
                 )}
             </View>
         </MotiView>
     );
 };
-
 const EmptyState = ({ type }: { type: string }) => (
     <MotiView
         from={{ opacity: 0, scale: 0.9 }}
@@ -110,7 +137,7 @@ const ProjectRequestScreen = () => {
     const [filter, setFilter] = useState<'pending' | 'history'>('pending');
     const { projectId } = useProject();
 
-    const { data, isLoading } = useGetProjectRequests(projectId);
+    const data= useGetProjectRequests(projectId);
 
     // Memoized filtering logic
     const filteredRequests = useMemo(() => {
@@ -122,7 +149,7 @@ const ProjectRequestScreen = () => {
         }
     }, [data, filter]);
 
-    if (isLoading) return (
+    if (!data) return (
         <View className="flex-1 justify-center items-center">
             <Text className="text-white">Loading....</Text>
         </View>
