@@ -88,6 +88,19 @@ export default function RootLayout() {
                     }}
                 />
 
+                <Tabs.Screen
+                    name="discovery"
+                    options={{
+                        tabBarIcon: ({ focused }) => (
+                            <Ionicons
+                                name={focused ? "search" : "search-outline"}
+                                size={24}
+                                color={focused ? "#fff" : "#a0a0a0ff"}
+                            />
+                        ),
+                    }}
+                />
+
 
             </Tabs>
         </LinearBackgroundProvider>

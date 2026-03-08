@@ -16,6 +16,7 @@ import DeleteProjectAlertDialog from "@/components/Dialogs/DeleteProjectAlertDia
 import ApplyTeamProjectPositionDialog from "@/components/Dialogs/ApplyTeamProjectPositionDialog";
 import {useUser} from "@clerk/clerk-expo";
 import ProjectLayoutSkeletonView from "@/components/SkeletonLayout/ProjectLayoutSkeletonView";
+import { MotiView } from "moti";
 
 
 type ProjectLayoutScreenProps = {
@@ -131,6 +132,18 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                     alignItems: "center",
                     gap: 10,
                 }}>
+
+                    <MotiView
+                        from={{ opacity: 0, translateY: -20 }}
+                        animate={{ opacity: 1, translateY: 0 }}
+                        transition={{ type: 'timing', duration: 400 }}
+                        style={{
+                            flexDirection: "row",
+                            width: "100%",
+                            alignItems: "center",
+                            height: 70,
+                        }}
+                    >
                     <TouchableOpacity
                         onPress={() => {
                             router.back()
@@ -195,6 +208,9 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
 
                     )}
 
+                    </MotiView>
+
+
 
                 </View>
             </View>
@@ -204,6 +220,7 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
             <ScrollView
                 overScrollMode={"never"}
                 bounces={false}
+                showsVerticalScrollIndicator={false}
                 style={{
                     gap: 12
                 }}
@@ -212,6 +229,13 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                 }}
             >
                 {/*  thumbnail   */}
+
+                <MotiView
+                    from={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ type: 'timing', duration: 400, delay: 100 }}
+
+                >
                 <View style={{width: "100%", height: 170, overflow: "hidden", borderRadius: 16, marginTop: 16}}>
 
 
@@ -270,10 +294,19 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                     </View>
 
 
+
+
                 </View>
+                </MotiView>
 
 
                 {/*  Project Information  */}
+
+            <MotiView
+                from={{ opacity: 0, translateY: -30 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ type: 'timing', duration: 400, delay: 100 }}
+            >
                 <View>
                     <Text style={{
                         letterSpacing: 1,
@@ -336,11 +369,22 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                     </TouchableOpacity>
 
 
+
+
                 </View>
+
+            </MotiView>
+
 
 
                 {/*  Tabs Selection  */}
                 <View>
+
+                    <MotiView
+                        from={{ opacity: 0, translateY: -30  }}
+                        animate={{ opacity: 1, translateY: 0 }}
+                        transition={{ type: 'timing', duration: 400, delay: 400 }}
+                    >
 
                     <View style={{
                         flexDirection: 'row',
@@ -382,8 +426,17 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                         })}
                     </View>
 
+            </MotiView>
                 </View>
 
+
+
+                <MotiView
+                    key={selectedTab}
+                    from={{ opacity: 0, translateX: 10 }}
+                    animate={{ opacity: 1, translateX: 0 }}
+                    transition={{ type: 'timing', duration: 400 }}
+                >
 
                 {/*  Tabs Screen   */}
                 {selectedTab === "Stats" && (
@@ -436,6 +489,8 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
 
                     />
                 )}
+
+                </MotiView>
 
             </ScrollView>
 

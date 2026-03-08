@@ -7,6 +7,7 @@ import {useGithubDashBoardInfo} from "@/queries/dashBoard/dashBoardGithub";
 import ImpactRing from "@/components/Extras/ImpactRing";
 import {ImpactScoreResult} from "@/lib/impactScore";
 import {ImpactScoreBreakDownDialog} from "@/components/Dialogs/impactScoreBreakDownDialog";
+import DashboardSkeletonView from "@/components/SkeletonLayout/DashboardSkeletonView";
 
 
 const getGreeting = () => {
@@ -31,6 +32,13 @@ const Index = () => {
         isLoading,
         isError,
     } = useGithubDashBoardInfo(user?.id ?? "",user?.username??"")
+
+
+    if(!data){
+        return(
+         <DashboardSkeletonView/>
+        )
+    }
 
 
     return (
