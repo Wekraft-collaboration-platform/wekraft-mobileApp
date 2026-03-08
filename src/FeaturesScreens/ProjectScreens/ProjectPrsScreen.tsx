@@ -14,6 +14,7 @@ import { router } from "expo-router"
 import {useGetProjectPulls} from "@/queries/project/useGetProjectPullsRequest";
 import {formatRelativeTime} from "@/components/Helper/helper";
 import {useProject} from "@/src/FeaturesScreens/ProjectScreens/ProjectProvider";
+import PrSkeletonView from "@/components/SkeletonLayout/PrSkeletonView";
 
 type PullLabel = {
     id: number
@@ -147,9 +148,7 @@ function ProjectPrsScreen() {
 
     if (!project || isLoading) {
         return (
-            <View className="flex-1 justify-center items-center">
-                <Text className="text-white">Loading....</Text>
-            </View>
+          <PrSkeletonView/>
         );
     }
 

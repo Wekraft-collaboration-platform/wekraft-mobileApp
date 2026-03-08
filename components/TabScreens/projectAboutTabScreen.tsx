@@ -153,7 +153,7 @@ const ProjectAboutTabScreen = ({about,openEditAbout,repo,owner,stopNavigation,}:
         return (
             <View style={{
                 backgroundColor: "#18181b",
-                borderColor: "#3f3f46",
+                borderColor: "#27272a",
                 borderWidth: 1,
                 borderRadius: 24,
                 padding: 16,

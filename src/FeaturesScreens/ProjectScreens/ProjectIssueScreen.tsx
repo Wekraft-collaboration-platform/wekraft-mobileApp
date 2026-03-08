@@ -14,6 +14,7 @@ import { router } from "expo-router"
 import {useGetProjectIssue} from "@/queries/project/useGetProjectIssues";
 import { formatRelativeTime} from "@/components/Helper/helper";
 import { useProject } from "@/src/FeaturesScreens/ProjectScreens/ProjectProvider";
+import IssueSkeltonView from "@/components/SkeletonLayout/IssueSkeletonView";
 
 type IssueLabel =
     | string
@@ -147,9 +148,7 @@ function ProjectIssuesScreen() {
 
     if (!project || isLoading) {
         return (
-            <View className="flex-1 justify-center items-center">
-                <Text className="text-white">Loading....</Text>
-            </View>
+           <IssueSkeltonView/>
         );
     }
     return (

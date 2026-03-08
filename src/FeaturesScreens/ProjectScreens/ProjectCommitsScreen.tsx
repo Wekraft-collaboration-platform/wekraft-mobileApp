@@ -7,6 +7,8 @@ import { router } from "expo-router";
 import {useGetProjectCommits} from "@/queries/project/useGetProjectCommits";
 import {formatRelativeTime} from "@/components/Helper/helper";
 import {useProject} from "@/src/FeaturesScreens/ProjectScreens/ProjectProvider";
+import CommitSkeletonView from "@/components/SkeletonLayout/CommitsSkeletonView";
+import CommitsSkeletonView from "@/components/SkeletonLayout/CommitsSkeletonView";
 
 const CommitCard = ({ item, index, isLast }: { item: any; index: number; isLast: boolean }) => {
     const { commit, author, sha, html_url } = item;
@@ -97,9 +99,7 @@ function ProjectCommitsScreen() {
 
     if (!project || isLoading) {
         return (
-            <View className="flex-1 justify-center items-center">
-                <Text className="text-white">Loading....</Text>
-            </View>
+            <CommitsSkeletonView />
         );
     }
     return (

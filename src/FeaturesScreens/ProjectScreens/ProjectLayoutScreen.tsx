@@ -15,6 +15,7 @@ import Toast from "react-native-toast-message";
 import DeleteProjectAlertDialog from "@/components/Dialogs/DeleteProjectAlertDialog";
 import ApplyTeamProjectPositionDialog from "@/components/Dialogs/ApplyTeamProjectPositionDialog";
 import {useUser} from "@clerk/clerk-expo";
+import ProjectLayoutSkeletonView from "@/components/SkeletonLayout/ProjectLayoutSkeletonView";
 
 
 type ProjectLayoutScreenProps = {
@@ -101,14 +102,12 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
 
     if (!project || !health || !languages) {
         return (
-            <View className={"flex-1 justify-center items-center"}>
-                <Text className={"text-white text-xl"}>Loading...</Text>
-            </View>
+           <ProjectLayoutSkeletonView/>
         )
     }
 
 
-    console.log(health)
+    // console.log(health)
 
     return (
 

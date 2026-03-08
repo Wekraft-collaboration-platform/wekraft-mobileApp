@@ -10,6 +10,7 @@ import {Id} from "@/convex/_generated/dataModel";
 import DeleteProjectAlertDialog from "@/components/Dialogs/DeleteProjectAlertDialog";
 import Toast from "react-native-toast-message";
 import PlanUpgradeDialog from "@/components/Dialogs/PlanUpgradeDialog";
+import ProjectsSkeletonView from "@/components/SkeletonLayout/ProjectsSkeletonView";
 
 const Project = () => {
 
@@ -70,9 +71,7 @@ const Project = () => {
 
     if (Projects === undefined) {
         return (
-            <View className={"flex-1 justify-center items-center"}>
-                <Text className={"text-white text-xl"}>Loading...</Text>
-            </View>
+           <ProjectsSkeletonView/>
         )
     }
 

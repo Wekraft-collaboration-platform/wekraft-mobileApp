@@ -6,6 +6,7 @@ import { FadeInDown } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import {useProject} from "@/src/FeaturesScreens/ProjectScreens/ProjectProvider";
 import {useGetProjectRequests} from "@/queries/project/useGetProjectRequests";
+import RequestSkeletonView from "@/components/SkeletonLayout/RequestSkeletonView";
 
 // Helper for relative time (assuming standard date string)
 const formatRelativeTime = (date: number | string) => {
@@ -150,9 +151,7 @@ const ProjectRequestScreen = () => {
     }, [data, filter]);
 
     if (!data) return (
-        <View className="flex-1 justify-center items-center">
-            <Text className="text-white">Loading....</Text>
-        </View>
+      <RequestSkeletonView/>
     )
 
     return (

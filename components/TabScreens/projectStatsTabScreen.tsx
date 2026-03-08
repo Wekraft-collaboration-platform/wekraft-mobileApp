@@ -34,13 +34,13 @@ const ProjectStatsTabScreen = ({health,projectData,languages,openIssue,openPr,st
 
             const { data: score } = await getScore.refetch()
 
-
-            console.log("Old Data")
-            console.log(projectData.healthScore)
-            console.log("New Data")
-            console.log(score)
-            console.log("Project Id")
-            console.log(projectData._id)
+            //
+            // console.log("Old Data")
+            // console.log(projectData.healthScore)
+            // console.log("New Data")
+            // console.log(score)
+            // console.log("Project Id")
+            // console.log(projectData._id)
 
             await updateProject({
                 projectId: projectData._id as Id<"projects">,
