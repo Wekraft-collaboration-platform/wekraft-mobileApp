@@ -159,6 +159,8 @@ export const getRepositories = action({
 
 }
 })
+
+
 export const getRepositoriesBySearch = action({
   args: {
     page:v.number(),
@@ -271,6 +273,83 @@ export const fetchGithubRepos = action({
   },
 });
 
+export const fetchAllGithubRepos = action({
+  args: {},
+  handler: async (ctx): Promise<GithubRepo[]> => {
+    const token = await ensureGithubToken(ctx);
+
+    let page = 1;
+    const allRepos: GithubRepo[] = [];
+
+    while (true) {
+      const res = await fetch(
+          `https://api.github.com/user/repos?per_page=100&page=${page}&affiliation=owner,collaborator,organization_member`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/vnd.github+json",
+            },
+          }
+      );
+
+      if (!res.ok) {
+        throw new Error("GitHub API request failed");
+      }
+
+      // console.log("GitHub API request success," res.json());
+
+      // const r = await res.json();
+      // console.log("GitHub API request success,");
+      const repos: GithubRepoRaw[] = await res.json();
+      if (repos.length === 0) break;
+
+      for (const repo of repos) {
+        allRepos.push({
+          id: repo.id,
+          name: repo.name,
+          full_name: repo.full_name,
+          private: repo.private,
+          html_url: repo.html_url,
+          ownerLogin: repo.owner.login,
+          ownerAvatar: repo.owner.avatar_url,
+          created_at: repo.created_at,
+          updated_at: repo.updated_at,
+          pushed_at: repo.pushed_at,
+          // description:repo.description
+        });
+      }
+
+      page++;
+    }
+
+    return allRepos;
+  },
+});
+
+
+
+
+type CommitNode = {
+  committedDate: string;
+};
+
+type IssueNode = {
+  createdAt: string;
+  closedAt: string | null;
+  comments: { totalCount: number };
+};
+
+type PRNode = {
+  mergedAt: string | null;
+  additions: number;
+  deletions: number;
+  files: { totalCount: number };
+  labels: { nodes: { name: string }[] };
+};
+
+type LabelNode = {
+  name: string;
+};
 
 export const getProjectHealthData = action({
   args: {
@@ -282,16 +361,19 @@ export const getProjectHealthData = action({
     const octokit = new Octokit({ auth: token });
 
     const query = `
-      query ($owner: String!, $repo: String!) {
+       query ($owner: String!, $repo: String!, $since: GitTimestamp!) {
         repository(owner: $owner, name: $repo) {
-          issues {
-            totalCount
+        
+          openIssues: issues(states: OPEN) {
+          totalCount
           }
           closedIssues: issues(states: CLOSED) {
             totalCount
           }
-          pullRequests {
-            totalCount
+          pullRequests(first:100) {
+            nodes {
+              merged
+            }
           }
           mergedPRs: pullRequests(states: MERGED) {
             totalCount
@@ -300,68 +382,240 @@ export const getProjectHealthData = action({
             target {
               ... on Commit {
                 committedDate
-                history(
-                  since: "${new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString()}"
-                  first: 100
-                ) {
+
+                history {
+                  totalCount
+                }
+
+                recentHistory: history(first: 100, since: $since) {
                   nodes {
                     committedDate
                   }
                 }
-
               }
             }
           }
+          recentClosedIssues: issues(
+            states: CLOSED,
+            first: 50,
+            orderBy: { field: UPDATED_AT, direction: DESC }
+          ) {
+            nodes {
+              createdAt
+              closedAt
+              comments {
+                totalCount
+              }
+            }
+          }
+
+          recentMergedPRs: pullRequests(
+            states: MERGED,
+            first: 50,
+            orderBy: { field: UPDATED_AT, direction: DESC }
+          ) {
+            nodes {
+              mergedAt
+              additions
+              deletions
+              files {
+                totalCount
+              }
+              labels(first: 10) {
+                nodes {
+                  name
+                }
+              }
+            }
         }
+      }
       }
     `;
 
-    const res: any = await octokit.graphql(query, {
-      owner: args.owner,
-      repo: args.repo,
-    });
-    
+      const now = Date.now();
+      const DAY = 24 * 60 * 60 * 1000;
 
-    const buckets = Array(60).fill(0);
-    const now = Date.now();
+    const since60Days = new Date(now - 60 * DAY).toISOString();
+      const sevenDaysAgo = now - 7 * DAY;
+      const fourteenDaysAgo = now - 14 * DAY;
 
-    res.repository.defaultBranchRef.target.history.nodes.forEach(
-      (commit: any) => {
-        const daysAgo = Math.floor(
-          (now - new Date(commit.committedDate).getTime()) /
-          (24 * 60 * 60 * 1000)
-        );
+      const res: any = await octokit.graphql(query, {
+        owner: args.owner,
+        repo: args.repo,
+        since:since60Days
+      });
 
-        
-        if (daysAgo >= 0 && daysAgo < 60) {
-            buckets[daysAgo]++
-        }
-      }
-    );
 
-    const openIssues =
-      res.repository.issues.totalCount -
-      res.repository.closedIssues.totalCount;
 
-    const closedIssues = res.repository.closedIssues.totalCount;
 
-    const totalPRs = res.repository.pullRequests.totalCount;
-    const mergedPRs = res.repository.mergedPRs.totalCount;
+    const repo = res.repository;
+
+    const commitData = repo.defaultBranchRef?.target;
+
+    const commits: CommitNode[] = commitData?.recentHistory?.nodes ?? [];
+
+    // ✅ Issue counts (exact)
+    const openIssuesCount = repo.openIssues.totalCount;
+    const closedIssuesCount = repo.closedIssues.totalCount;
+
+    // ✅ Commit data (max 100, same as REST)
+    const totalCommits =
+        commitData?.history?.totalCount ?? 0;
+
+// ✅ Last 60 days commits (array)
+    const recentCommits =
+        commitData?.recentHistory?.nodes ?? [];
+
+    const commitsLast60Days = recentCommits.length;
+
+    const lastCommitDate =
+        commitData?.committedDate ?? null;
+
+    const prs = repo.pullRequests?.nodes ?? [];
+
+    const totalPRs = prs.length;
+    const mergedPRs = prs.filter((pr: any) => pr.merged).length;
 
     const prMergeRate =
-      totalPRs === 0 ? 0 : Math.round((mergedPRs / totalPRs) * 100);
+        totalPRs > 0 ? Math.round((mergedPRs / totalPRs) * 100) : 0;
+
+
+    // ---- Velocity windows ----
+    const commitsCurrent = commits.filter((c) =>
+        new Date(c.committedDate).getTime() >= sevenDaysAgo
+    );
+
+    const commitsPrevious = commits.filter(c => {
+      const t = new Date(c.committedDate).getTime();
+      return t >= fourteenDaysAgo && t < sevenDaysAgo;
+    });
+
+    const commitScoreCurrent = commitsCurrent.length ;
+    const commitScorePrev = commitsPrevious.length  ;
+
+
+    // ---- Issues ----
+    let issueScoreCurrent = 0;
+    let issueCount = 0
+    let issueScorePrev = 0;
+
+    const issues: IssueNode[] = repo.recentClosedIssues?.nodes ?? [];
+
+
+    for (const issue of issues) {
+      if (!issue.closedAt) continue;
+
+      const closedAt = new Date(issue.closedAt).getTime();
+      const createdAt = new Date(issue.createdAt).getTime();
+
+      const hoursOpen =
+          (closedAt - createdAt) / (1000 * 60 * 60);
+
+      if (hoursOpen < 1 && issue.comments.totalCount === 0)
+        continue;
+
+      let factor = 1;
+      if (hoursOpen < 24) factor = 0.5;
+
+      if (closedAt >= sevenDaysAgo) {
+        issueCount++;
+        issueScoreCurrent += 3 * factor;
+      } else if (closedAt >= fourteenDaysAgo) {
+        issueScorePrev += 3 * factor;
+      }
+    }
+
+
+    // ---- PRs ----
+    let prScoreCurrent = 0;
+    let prCount = 0
+
+    let prScorePrev = 0;
+
+    const recentPRs: PRNode[] = repo.recentMergedPRs?.nodes ?? [];
+
+    for (const pr of recentPRs) {
+      if (!pr.mergedAt) continue;
+
+      const mergedAt = new Date(pr.mergedAt).getTime();
+
+      const isDocs =
+          pr.labels.nodes.some((l) =>
+              l.name.toLowerCase().includes("doc")
+          ) || pr.files.totalCount <= 1;
+
+      const size = pr.additions + pr.deletions;
+      const weight = isDocs ? 2 : size < 20 ? 3 : 5;
+
+      if (mergedAt >= sevenDaysAgo) {
+        prCount++;
+        prScoreCurrent += weight;
+      } else if (mergedAt >= fourteenDaysAgo) {
+        prScorePrev += weight;
+      }
+    }
+
+
+    // ---- Final velocities ----
+    const velocityCurrent =
+        commitScoreCurrent + issueScoreCurrent + prScoreCurrent;
+
+    const velocityPrevious =
+        commitScorePrev + issueScorePrev + prScorePrev;
+
+    const velocityDelta = velocityCurrent - velocityPrevious;
+
+    // ---- Fresh repo validation ----
+    const repoCreatedAt = new Date(res.repository.createdAt).getTime();
+    const repoAgeDays = (now - repoCreatedAt) / DAY;
+
+    const isFreshRepo =
+        repoAgeDays < 14 ||
+        res.repository.defaultBranchRef?.target?.history?.totalCount < 5 ||
+        commitsLast60Days === commitScoreCurrent;
+
+    let velocityTrend: "up" | "down" | "flat" | "insufficient" =
+        "flat";
+
+    if (isFreshRepo) {
+      velocityTrend = "insufficient";
+    } else if (velocityDelta >= 2) {
+      velocityTrend = "up";
+    } else if (velocityDelta <= -2) {
+      velocityTrend = "down";
+    }
+
 
     return {
-      openIssuesCount: openIssues,
-      closedIssuesCount: closedIssues,
-      lastCommitDate:
-        res.repository.defaultBranchRef?.target?.committedDate ?? null,
-      commitsLast60Days: buckets.reduce((a, b) => a + b, 0),
-      commitBuckets: buckets,
+      openIssuesCount,
+      closedIssuesCount,
+      lastCommitDate,
+      totalCommits,
+      commitsLast60Days,
+      totalPRs,
+      mergedPRs,
       prMergeRate,
-    };
 
+      issueCount:issueCount,
+      prCount:prCount,
+
+      velocity7d: Math.round(velocityCurrent),
+      velocityPrev7d: Math.round(velocityPrevious),
+      velocityDelta,
+      velocityTrend,
+      isFreshRepo,
+
+      velocityBreakdown: {
+        commits: commitScoreCurrent,
+        issues: issueScoreCurrent,
+        prs: prScoreCurrent,
+      },
+
+
+    };
   },
+
+
 });
 
 
@@ -455,8 +709,6 @@ export const fetchRepoLanguages = action({
     };
   },
 });
-
-
 
 
 export const getGithubToken = action({
@@ -604,3 +856,163 @@ export const getDashboardStats = action({
     };
   },
 });
+
+
+//   Get Project Commits data
+
+export const getProjectCommits = action({
+  args:{
+    owner:v.string(),
+    repo : v.string(),
+  },
+  handler : async (ctx,args)=>{
+    const identiy = await  ctx.auth.getUserIdentity()
+    if(!identiy) {
+      throw new Error("call commits with out Authentication")
+    }
+
+    const token = await ensureGithubToken(ctx)
+    if(!token){
+      throw  new Error("call commits with out token")
+    }
+
+
+    const octokit = new Octokit({
+      auth:token
+    })
+
+    return await octokit.rest.repos.listCommits({
+      owner: args.owner,
+      repo: args.repo,
+      per_page: 100,
+    });
+  }
+})
+
+
+
+
+//    Get Projects Pulls Request
+
+export const getProjectPrs = action({
+  args:{
+    owner:v.string(),
+    repo:v.string()
+  },
+  handler : async(ctx,args) =>{
+
+    const identity = await ctx.auth.getUserIdentity()
+
+    if(!identity){
+      throw new Error("calling Project Pulls without Auth")
+    }
+
+    const token = await ensureGithubToken(ctx)
+    if(!token){
+      throw new Error("Calling Project Pulls without Token")
+    }
+
+    const octokit = new Octokit({auth:token})
+
+    const pullRequests = await octokit.paginate(
+        octokit.rest.pulls.list,
+        {
+          owner:args.owner,
+          repo:args.repo,
+          state: "all",
+          per_page: 100,
+        }
+    )
+
+
+    // Remove pull requests
+    return pullRequests
+  }
+})
+
+
+
+
+// Get project Issues
+
+
+export const getProjectIssue = action({
+  args:{
+    owner:v.string(),
+    repo:v.string()
+  },
+  handler : async(ctx,args) =>{
+
+    const identity = await ctx.auth.getUserIdentity()
+
+    if(!identity){
+      throw new Error("calling Project Issue without Auth")
+    }
+
+    const token = await ensureGithubToken(ctx)
+    if(!token){
+      throw new Error("Calling Project Issues without Token")
+    }
+
+    const octokit = new Octokit({auth:token})
+
+    const issues = await octokit.paginate(
+        octokit.rest.issues.listForRepo,
+        {
+          owner:args.owner,
+          repo:args.repo,
+          state: "all",
+          per_page: 100,
+        }
+    )
+
+
+    // Remove pull requests
+    return issues.filter(issue => !issue.pull_request)
+  }
+})
+
+
+
+//    Get Readme Content
+
+
+export const getReadme = action({
+  args:{
+    owner:v.string(),
+    repo:v.string(),
+  },
+  handler : async(ctx,args) =>{
+    const identity = await ctx.auth.getUserIdentity()
+    if(!identity){
+      throw new Error("Call getReame WithOuy Auth")
+    }
+    const token = await ensureGithubToken(ctx)
+    if(!token) {
+      throw  new Error("Call getReadMe without Token")
+    }
+
+    const octokit = new Octokit({ auth: token });
+
+    try {
+      const { data } = await octokit.rest.repos.getReadme({
+        owner:args.owner,
+        repo:args.repo,
+        mediaType: {
+          format: "raw",
+        },
+      });
+
+      console.log("✅ README fetched successfully");
+      return data as unknown as string;
+    } catch (error) {
+      console.error("❌ Error fetching README:", error);
+      // If README doesn't exist, GitHub API returns 404
+      return null;
+    }
+
+
+
+  }
+})
+

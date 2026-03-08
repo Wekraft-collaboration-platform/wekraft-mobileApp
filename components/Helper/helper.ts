@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
+import {StyleSheet} from "react-native";
 
 
 export const formatRelativeTime = (isoDate: string) => {
@@ -32,28 +33,38 @@ export const useDebounce = <T>(value: T, delay: number) => {
 }
 
 
+const MAX_SIZE = 1024 * 1024; // 1MB
+
 export const pickThumbnail = async () => {
-  const permission =
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-  if (!permission.granted) {
-    return;
-  }
+    if (!permission.granted) return null;
 
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    aspect: [16, 9],
-    quality: 0.9,
-  });
+    const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.9,
+    });
 
-  if (result.canceled) return null;
-  const uri = result.assets[0].uri;
-  return (uri)
+    if (result.canceled || !result.assets?.length) return null;
 
+    const asset = result.assets[0];
+    const uri = asset.uri;
 
+    const fileInfo = await FileSystem.getInfoAsync(uri);
+
+    if (!fileInfo.exists) {
+        throw new Error("File does not exist");
+    }
+
+    if ((fileInfo.size ?? 0) > MAX_SIZE) {
+        alert("Image must be smaller than 1MB");
+        return null;
+    }
+
+    return uri;
 };
-
 
 
 
@@ -79,3 +90,4 @@ export function getContentType(uri: string) {
     if (uri.endsWith(".webp")) return "image/webp";
     return "image/png";
 }
+

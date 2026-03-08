@@ -1,25 +1,53 @@
-import {Stack, Tabs} from "expo-router";
+import {Tabs, useSegments} from "expo-router";
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
-import {Tab} from "@clerk/clerk-js/dist/types/ui/elements/Tabs";
 import {LinearGradient} from "expo-linear-gradient";
 import {colors} from "@/constraints/Colors";
 import {Ionicons} from "@expo/vector-icons";
+import {useEffect, useRef} from "react";
+import {Animated} from "react-native";
+
+
+const TAB_BAR_HEIGHT = 100;
 
 export default function RootLayout() {
+
+    const segments = useSegments()
+    const hideTabBar =
+        (segments[1] ==="project"  && segments[2] !==undefined)
+
+
+    const translateY =useRef(new Animated.Value(0)).current
+
+    useEffect(() => {
+        Animated.spring(translateY, {
+            toValue: hideTabBar ? TAB_BAR_HEIGHT : 0,
+            damping: 23,
+            stiffness: 110,
+            useNativeDriver: true,
+        }).start();
+    }, [hideTabBar]);
+
     return (
         <LinearBackgroundProvider isOn={false}>
 
             <Tabs
+
                 screenOptions={{
+                   animation:"shift",
                     headerShown: false,
                     tabBarShowLabel: false,
                     sceneStyle: {
                         backgroundColor: "transparent",
+                        paddingBottom: hideTabBar
+                            ? 0
+                            : 65,
                     },
                     tabBarStyle: {
+                        backgroundColor: "transparent",
                         borderTopWidth: 0,
                         elevation: 0,
-                        backgroundColor: "transparent"
+                        position: "absolute",
+                        transform: [{ translateY }],
                     },
 
                     tabBarBackground: () => (
@@ -34,7 +62,6 @@ export default function RootLayout() {
 
                 }}
             >
-
                 <Tabs.Screen
                     name={"index"}
                     options={{
@@ -47,6 +74,34 @@ export default function RootLayout() {
                         )
                     }}
                 />
+
+                <Tabs.Screen
+                    name="project"
+                    options={{
+                        tabBarIcon: ({ focused }) => (
+                            <Ionicons
+                                name={focused ? "folder" : "folder-outline"}
+                                size={24}
+                                color={focused ? "#fff" : "#a0a0a0ff"}
+                            />
+                        ),
+                    }}
+                />
+
+                <Tabs.Screen
+                    name="discovery"
+                    options={{
+                        tabBarIcon: ({ focused }) => (
+                            <Ionicons
+                                name={focused ? "search" : "search-outline"}
+                                size={24}
+                                color={focused ? "#fff" : "#a0a0a0ff"}
+                            />
+                        ),
+                    }}
+                />
+
+
             </Tabs>
         </LinearBackgroundProvider>
     )
