@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as discoveryProject from "../discoveryProject.js";
 import type * as github from "../github.js";
 import type * as githubHelper from "../githubHelper.js";
 import type * as projectRequests from "../projectRequests.js";
@@ -25,6 +26,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  discoveryProject: typeof discoveryProject;
   github: typeof github;
   githubHelper: typeof githubHelper;
   projectRequests: typeof projectRequests;

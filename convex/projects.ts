@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import {ConvexError, v} from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 export const create = mutation({
@@ -51,6 +51,16 @@ export const create = mutation({
     // Server-side validation for tags
     if (args.tags.length < 2 || args.tags.length > 5) {
       throw new Error("Please select between 2 and 5 tags.");
+    }
+
+    // Check if teh smae Project is Alrready Exixsits or not
+
+    const project = await ctx.db.query("projects")
+        .withIndex("by_repoUrl",(q)=>q.eq("repoUrl",args.repoUrl))
+        .first()
+
+    if(project){
+      throw  new ConvexError("Project Already Exists")
     }
 
     // Check if project with same name already exists for this user (optional but good practice)
