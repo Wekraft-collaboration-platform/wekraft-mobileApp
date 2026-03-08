@@ -176,7 +176,7 @@ const Project = () => {
                 onPress={()=>{
                     console.log("Projects : " + Projects.length)
                     console.log("user Data : ",user?.limit)
-                    if(Projects.length >= 1 || 0){
+                    if(Projects.length >= user?.limit || 2){
                         // Toast.show({
                         //   type: "error",
                         //   visibilityTime: 2000,
