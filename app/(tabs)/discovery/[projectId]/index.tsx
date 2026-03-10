@@ -8,8 +8,6 @@ import {Id} from "@/convex/_generated/dataModel";
 const Index = () => {
     const {projectId} = useLocalSearchParams()
 
-    const  [openProjectHealthDialog, setOpenProjectHealthDialog] = useState(false);
-
     return (
         <ProjectProvider projectId={projectId as Id<"projects">} mode={"user"}>
             <ProjectLayoutScreen
@@ -31,11 +29,6 @@ const Index = () => {
                 }}
                 onOpenEditAbout={(about) => {
                     console.log("Not Authorized")
-                    // router.push({
-                    //     pathname:`/project/${projectId}/editAboutScreen`,
-                    //     params: { projectId, about }
-                    // })
-
                 }}
             />
 
