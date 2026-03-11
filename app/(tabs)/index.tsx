@@ -1,5 +1,5 @@
 import {View, Text, Image, TouchableOpacity} from 'react-native'
-import React, {useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {useUser} from "@clerk/clerk-expo";
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 import {Ionicons} from "@expo/vector-icons";
@@ -8,6 +8,8 @@ import ImpactRing from "@/components/Extras/ImpactRing";
 import {ImpactScoreResult} from "@/lib/impactScore";
 import {ImpactScoreBreakDownDialog} from "@/components/Dialogs/impactScoreBreakDownDialog";
 import DashboardSkeletonView from "@/components/SkeletonLayout/DashboardSkeletonView";
+import {useMutation, useQuery} from "convex/react";
+import {api} from "@/convex/_generated/api";
 
 
 const getGreeting = () => {
@@ -21,9 +23,13 @@ const getGreeting = () => {
 
 const Index = () => {
     const {user} = useUser()
+    const currentUser = useQuery(api.users.getCurrentUser)
 
     const [impactScore, setImpactScore] =
         useState<ImpactScoreResult | null>(null);
+
+
+    const updateUser = useMutation(api.users.updateUser)
 
     const [openImpactScore, setOpenImpactScore]  = useState(false)
 
@@ -33,12 +39,36 @@ const Index = () => {
         isError,
     } = useGithubDashBoardInfo(user?.id ?? "",user?.username??"")
 
+    useEffect(() => {
+        if (!data || !impactScore || !currentUser) return
+
+        const payload = {
+            commits: data.totalCommits ?? 0,
+            pr: data.totalMergedPRs ?? 0,
+            issues: data.totalIssuesClosed ?? 0,
+            impactScore: impactScore.score ?? 0,
+        }
+
+        const isDifferent =
+            payload.commits !== currentUser.commits ||
+            payload.pr !== currentUser.pr ||
+            payload.issues !== currentUser.issues ||
+            payload.impactScore !== currentUser.impactScore
+
+        if (!isDifferent) return
+
+        updateUser(payload)
+
+    }, [data, impactScore, currentUser])
+
 
     if(!data){
         return(
          <DashboardSkeletonView/>
         )
     }
+
+
 
 
     return (

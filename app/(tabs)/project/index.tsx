@@ -421,7 +421,6 @@ const ProjectCard = ({item,onPress,onLongPress} : ProjectCardProps) => {
                             color:"#717682",
                             fontSize:14,
                             letterSpacing:1
-
                         }}>{item.description || "No Description is Provided"}</Text>
 
 
