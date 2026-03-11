@@ -72,7 +72,6 @@ const MODES = [
     },
 ];
 
-
 const Discover = () => {
     const { data: searchMode } = useSearchMode();
     const queryClient = useQueryClient();
@@ -88,8 +87,12 @@ const Discover = () => {
     const [debouncedRoles] = useDebounce(selectedRoles, 300);
     const [debouncedSearch] = useDebounce(searchText, 300);
 
-    const { data, isLoading } = useDiscoveryProject(debouncedTags, debouncedRoles, debouncedSearch);
-    const items = useMemo(() => data ?? [], [data]);
+    const data = useDiscoveryProject(
+        debouncedTags,
+        debouncedRoles,
+        debouncedSearch
+    );    const items = useMemo(() => data ?? [], [data]);
+    const isLoading = data === undefined;
 
     const hasActiveFilters = selectedTags.length > 0 || selectedRoles.length > 0 || searchText.length > 0;
 
@@ -457,7 +460,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 10,
     },
-    
+
     purgeBtnText: {
         color: '#000000',
         fontSize: 14,

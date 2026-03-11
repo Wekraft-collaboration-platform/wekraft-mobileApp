@@ -69,10 +69,6 @@ export const searchAndRank = query({
         roles: v.optional(v.array(v.string())),
     },
     handler: async (ctx, args) => {
-
-        console.log(args.tags)
-        console.log(args.roles)
-        console.log(args.query)
         // Fetch all public projects
         const allPublicProjects = await ctx.db
             .query("projects")
