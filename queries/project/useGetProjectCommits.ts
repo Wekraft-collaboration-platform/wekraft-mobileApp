@@ -1,6 +1,8 @@
-import {useAction} from "convex/react";
+import {useAction, useConvex} from "convex/react";
 import {api} from "@/convex/_generated/api";
-import {useQuery} from "@tanstack/react-query";
+import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
+import {ProjectDetails} from "@/constraints/interface";
+import {InfiniteData} from "@tanstack/query-core";
 
 
 export function useGetProjectCommits(owner:string,repo:string){
@@ -21,3 +23,6 @@ export function useGetProjectCommits(owner:string,repo:string){
         retry :1
     })
 }
+
+
+

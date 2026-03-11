@@ -147,9 +147,11 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_owner", ["ownerId"])
-    .index("by_repository", ["repositoryId"])
-    .index("by_public", ["isPublic"]), // For discovering public projects
+      .index("by_owner", ["ownerId"])
+      .index("by_repository", ["repositoryId"])
+      .index("by_repoUrl", ["repoUrl"])
+      .index("by_repoName",["repoName"])
+      .index("by_public", ["isPublic"]), // For discovering public projects
 
   // ==============================
   // projectJoinRequests

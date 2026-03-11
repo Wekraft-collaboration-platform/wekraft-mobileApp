@@ -173,7 +173,70 @@ export type GithubRepo = {
   created_at: string;
   updated_at: string;
   pushed_at: string;
- 
+
+
+};
+
+
+
+export type ProjectDetails = {
+  // Convex system fields
+  _id: string;
+  _creationTime: number;
+
+  // Timestamps
+  createdAt: number;
+  updatedAt: number;
+
+  // Core project details
+  projectName: string;
+  description: string;
+  tags: string[];
+
+  // Visibility
+  isPublic: boolean;
+
+  // Repository linkage
+  repositoryId: string;
+  repoName: string;
+  repoFullName: string;
+  repoOwner: string;
+  repoUrl: string;
+  thumbnailUrl?: string;
+
+  // Community & collaboration
+  lookingForMembers?: {
+    role: string;
+    type: "casual" | "part-time" | "serious";
+  }[];
+
+  about?: string;
+
+  // Ownership
+  ownerId: string;
+
+  // Engagement metrics
+  projectForks?: number;
+  projectStars?: number;
+  projectUpvotes?: number;
+
+  // Health score system
+  healthScore?: {
+    totalScore: number;           // 0–100
+    activityMomentum: number;     // 0–35
+    maintenanceQuality: number;   // 0–35
+    communityTrust: number;       // 0–20
+    freshness: number;            // 0–10
+    lastCalculatedDate: string;   // YYYY-MM-DD
+
+    previousScores: {
+      totalScore: number;
+      calculatedDate: string;     // YYYY-MM-DD
+    }[];
+  };
+
+  // Invites
+  inviteLink?: string;
 };
 
 
