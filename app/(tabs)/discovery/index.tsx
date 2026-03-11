@@ -212,7 +212,6 @@ const Discover = () => {
                     <Animated.View
                         entering={FadeInDown.duration(200)}
                         exiting={FadeOut.duration(100)}
-                        layout={Layout.springify()}   // <- important
                         style={[styles.filterPanel,animatedStyle]}
                     >
                         <View style={styles.panelHeader}>
@@ -242,7 +241,6 @@ const Discover = () => {
                             isLast
                         />
                     </Animated.View>
-                {/*)}*/}
             </Animated.View>
 
             <FlatList
@@ -316,7 +314,6 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingHorizontal: 20,
         paddingBottom: 40,
-        paddingTop: 20,
     },
     header: {
         marginBottom: 32,
@@ -416,12 +413,6 @@ const styles = StyleSheet.create({
     skeletonCard: { flexDirection: 'row', gap: 15, padding: 16, backgroundColor: '#0A0A0A', borderRadius: 12, marginBottom: 10, borderWidth: 1, borderColor: '#1A1A1A' },
     skeletonSquare: { width: 44, height: 44, backgroundColor: '#111', borderRadius: 6 },
     skeletonLine: { height: 10, backgroundColor: '#111', borderRadius: 4 },
-    emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center", paddingTop: 60 },
-    emptySubtext: { color: "rgba(255,255,255,0.3)", fontSize: 14, marginTop: 12, marginBottom: 24 },
-    purgeBtn: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 10, borderWidth: 1, borderColor: "#3B82F640" },
-    purgeBtnText: { color: "#3B82F6", fontSize: 12, fontWeight: "800" },
-
-
     emptyContainer: {
         flex: 1,
         alignItems: 'center',
@@ -466,6 +457,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 10,
     },
+    
     purgeBtnText: {
         color: '#000000',
         fontSize: 14,

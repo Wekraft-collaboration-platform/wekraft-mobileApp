@@ -10,10 +10,6 @@ const DiscoveryProjectSkeleton = () => {
             <View style={styles.thumbnailWrapper}>
                 <SkeletonBlock height={160} width="100%" radius={0} />
 
-                {/* Floating Owner Badge Placeholder */}
-                <View style={styles.ownerBadgePlaceholder}>
-                    <SkeletonBlock height={28} width={100} radius={8} />
-                </View>
             </View>
 
             {/* 2. CONTENT BODY SKELETON */}
@@ -59,7 +55,7 @@ const DiscoveryProjectSkeleton = () => {
  */
 export const DiscoveryProjectSkeletonView = () => (
     <View style={{ flex: 1}}>
-        {[1, 2, 3].map((key) => (
+        {[1, 2, 3,4,5,6].map((key) => (
             <DiscoveryProjectSkeleton key={key} />
         ))}
     </View>
