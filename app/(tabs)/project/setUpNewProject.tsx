@@ -510,16 +510,29 @@ const setUpNewProject = () => {
                                     text1: "Project Added",
                                     text2: "Project added successfully",
                                 })
-                            }catch(e){
-                                console.log(e)
-                                setLoading(false)
+                            }
+                            catch (e: any) {
+
+                                console.log("Create project error:", e)
+
+                                if (e?.data?.code === "You can only connect one repository.") {
+                                    return (Toast.show({
+                                        type: "error",
+                                        text1: "Project already exists",
+                                        text2: "This repository is already linked to a project",
+                                        position: "bottom",
+                                    }))
+
+                                }
+
                                 Toast.show({
                                     type: "error",
                                     visibilityTime: 2000,
                                     position: "bottom",
                                     text1: "Uploading Error",
-                                    text2: "Something went wrong Please try again Later",
+                                    text2: "Something went wrong. Please try again later",
                                 })
+
                             }finally{
                                 setLoading(false)
                                 router.replace("/project")

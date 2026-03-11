@@ -33,6 +33,11 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
 
     const [role,setRole]=useState("")
 
+        const tabItems = [
+            "Stats",
+            "About",
+            ...(mode === "admin" ? ["Request"] : [])
+        ]
 
     const [selectedTab, setSelectedTab] = useState<string>("Stats")
     const [stopNav, setStopNav] = useState<boolean>(false)
@@ -154,6 +159,7 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                             borderColor: "#2D2D2F",
                             borderWidth: 2,
                             borderRadius: 12,
+                            marginRight:7,
                             padding: 7,
                         }}
                     >
@@ -393,7 +399,7 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                         borderRadius: 14,
                         marginVertical: 12,
                     }}>
-                        {['Stats', 'About', 'Request'].map((tab) => {
+                        {tabItems.map((tab) => {
                             const isSelected = selectedTab === tab
                             return (
                                 <TouchableOpacity

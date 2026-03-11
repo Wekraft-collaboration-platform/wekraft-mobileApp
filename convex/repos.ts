@@ -1,5 +1,5 @@
 import { mutation, query } from "./_generated/server";
-import { v } from "convex/values";
+import {ConvexError, v} from "convex/values";
 
 export const createRepository = mutation({
   args: {
@@ -35,7 +35,7 @@ export const createRepository = mutation({
       .first();
 
     if (existingRepo) {
-      throw new Error("You can only connect one repository.");
+      throw new ConvexError("You can only connect one repository.");
     }
 
     const repositoryId = await ctx.db.insert("repositories", {

@@ -13,7 +13,7 @@ export default function RootLayout() {
 
     const segments = useSegments()
     const hideTabBar =
-        (segments[1] ==="project"  && segments[2] !==undefined)
+        ((segments[1] ==="project" || segments[1]==="discovery") && segments[2] !==undefined)
 
 
     const translateY =useRef(new Animated.Value(0)).current
