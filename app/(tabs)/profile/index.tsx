@@ -41,9 +41,6 @@ const Index = () => {
                         <View style={styles.avatarContainer}>
                             <View style={styles.avatarGlow} />
                             <Image source={{ uri: user.imageUrl }} style={styles.avatar} />
-                            <TouchableOpacity style={styles.cameraBadge}>
-                              <Ionicons name="camera" size={16} color="black" />
-                            </TouchableOpacity>
                         </View>
 
                         <Text style={styles.userName}>{user.username}</Text>
@@ -61,11 +58,11 @@ const Index = () => {
                         <View style={styles.cardGroup}>
                             <SettingItem
                                 icon="globe-outline"
-                                color="#0ea5e9" // A nice sky blue
+                                color="#0ea5e9"
                                 header="Public Profile"
                                 subHeading="View and share your profile"
                                 onPress={() => {
-
+                                    router.push("/profile/publicProfile")
                                 }}
                             />
                             <View style={styles.innerDivider} />
