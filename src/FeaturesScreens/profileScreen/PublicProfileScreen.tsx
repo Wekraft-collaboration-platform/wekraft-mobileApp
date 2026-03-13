@@ -12,6 +12,7 @@ import { api } from "@/convex/_generated/api";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { useProfile } from "@/src/FeaturesScreens/profileScreen/ProfiletProvider";
 import { Id } from "@/convex/_generated/dataModel";
+import PublicProfileSkeletonView from "@/components/SkeletonLayout/PublicProfileSkeletonView";
 
 interface Milestone {
     id: number;
@@ -86,11 +87,9 @@ const PublicProfileScreen = ({ onProjectSelected }: PublicProfileScreenProps) =>
         }
     };
 
-    if (!user) {
+    if (!user || !featuredProjects) {
         return (
-            <View style={[styles.container, styles.center]}>
-                <ActivityIndicator color="#6366f1" size="large" />
-            </View>
+            <PublicProfileSkeletonView/>
         );
     }
 
@@ -279,7 +278,7 @@ const SocialIconBtn = ({ icon, link }: { icon: React.ReactNode; link?: string })
 );
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#09090B' },
+    container: { flex: 1 },
     center: { justifyContent: 'center', alignItems: 'center' },
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
