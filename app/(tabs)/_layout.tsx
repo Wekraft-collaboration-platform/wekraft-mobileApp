@@ -1,4 +1,4 @@
-import {Tabs, useSegments} from "expo-router";
+import {Tabs, usePathname, useSegments} from "expo-router";
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 import {LinearGradient} from "expo-linear-gradient";
 import {colors} from "@/constraints/Colors";
@@ -11,7 +11,15 @@ const TAB_BAR_HEIGHT = 100;
 
 export default function RootLayout() {
 
-    const segments = useSegments()
+    const segments = useSegments();
+    const pathname = usePathname();
+
+    useEffect(() => {
+        console.log("PATH:", pathname);
+        console.log("SEGMENTS:", segments);
+    }, [segments, pathname]);
+
+
     const hideTabBar =
         ((segments[1] ==="project" || segments[1]==="discovery" || segments[1] ==="profile") && segments[2] !==undefined)
 

@@ -9,30 +9,37 @@ const Index = () => {
     const {projectId} = useLocalSearchParams()
 
     return (
-        <ProjectProvider projectId={projectId as Id<"projects">} mode={"user"}>
+        <ProjectProvider projectId={projectId as Id<"projects">} mode={"admin"}>
             <ProjectLayoutScreen
+
                 onCommits={() => {
-                    router.push(`/discovery/${projectId}/commitsScreen`)
+                    router.push(`/profile/${projectId}/commitsScreen`)
 
                 }}
                 onPr={() => {
-                    router.push(`/discovery/${projectId}/prScreen`)
+                    router.push(`/profile/${projectId}/prScreen`)
 
                 }}
                 onOpenIssue={() => {
-                    router.push(`/discovery/${projectId}/issueScreen`)
+                    router.push(`/profile/${projectId}/issueScreen`)
 
                 }}
                 onRequestOpen={() => {
-                    router.push(`/discovery/${projectId}/requestScreen`)
+                    router.push(`/profile/${projectId}/requestScreen`)
 
                 }}
                 onOpenEditProject={()=>{
-                    console.log("Not Authorized")
-
+                    router.push({
+                        pathname: `/profile/${projectId}/editProjectScreen`,
+                        params: { projectId },
+                    })
                 }}
                 onOpenEditAbout={(about) => {
-                    console.log("Not Authorized")
+                    router.push({
+                        pathname:`/profile/${projectId}/editAboutScreen`,
+                        params: { projectId, about }
+                    })
+
                 }}
             />
 

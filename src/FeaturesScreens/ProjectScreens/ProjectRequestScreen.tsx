@@ -18,7 +18,7 @@ const formatRelativeTime = (date: number | string) => {
     if (diffInHours < 24) return `${diffInHours}h ago`;
     return `${Math.floor(diffInHours / 24)}d ago`;
 };
-const RequestCard = ({ item, index, onAccept, onReject }: any) => {
+const RequestCard = ({ item, index, onAccept, onReject ,projectId}: any) => {
     const isPending = item.status === 'pending';
 
     const statusConfig = {
@@ -41,10 +41,24 @@ const RequestCard = ({ item, index, onAccept, onReject }: any) => {
                 <View className="flex-row justify-between items-start mb-5">
                     <View className="flex-row items-center gap-3">
                         <View className="relative">
+                            <TouchableOpacity
+                                activeOpacity={0.6}
+                                onPress={()=>{
+                                    router.push({
+                                        pathname:`/project/${projectId}/publicProfile`,
+                                        params: { userId : item.userId, }
+                                    })
+
+                                }}
+                                className="w-12 h-12 rounded-2xl bg-zinc-800 border border-zinc-700"
+
+                            >
+
                             <Image
                                 source={{ uri: item.userImage || 'https://avatar.iran.liara.run/public/30' }}
                                 className="w-12 h-12 rounded-2xl bg-zinc-800 border border-zinc-700"
                             />
+                            </TouchableOpacity>
                             {/* Small Online/Active Indicator */}
                             <View className="absolute -bottom-1 -right-1 w-4 h-4 bg-zinc-900 rounded-full items-center justify-center">
                                 <View className="w-2.5 h-2.5 bg-emerald-500 rounded-full border border-zinc-900" />
@@ -201,6 +215,7 @@ const ProjectRequestScreen = () => {
                         <RequestCard
                             item={item}
                             index={index}
+                            projectId={projectId}
                             onAccept={(id: string) => {
 
                             }}

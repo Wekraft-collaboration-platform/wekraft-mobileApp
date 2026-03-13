@@ -8,12 +8,12 @@ const editAboutScreen = () => {
         projectId: string;
         about: string;
     }>();
-  return (
-    <ProjectEditAboutScreen
-        projectId={projectId}
-        about={about}
-    />
-  );
+    return (
+        <ProjectEditAboutScreen
+            projectId={projectId}
+            about={about}
+        />
+    );
 };
 
 export default editAboutScreen;

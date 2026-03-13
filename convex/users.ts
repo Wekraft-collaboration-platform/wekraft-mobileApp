@@ -138,6 +138,32 @@ export const getCurrentUser = query({
 
 
 
+export const getUserbyId = query({
+  args:{
+    userId : v.id("users")
+  },
+  handler: async (ctx,args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      return null;
+    }
+
+    const user = await ctx.db
+        .query("users")
+        .withIndex("by_id", (q) =>
+            q.eq("_id", args.userId)
+        )
+        .unique();
+
+    return user ?? null;
+  },
+});
+
+
+
+
+
 export const connectGithub = mutation({
   args: {},
   handler: async (ctx) => {
