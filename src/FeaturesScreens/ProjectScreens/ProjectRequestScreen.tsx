@@ -7,6 +7,9 @@ import { router } from 'expo-router';
 import {useProject} from "@/src/FeaturesScreens/ProjectScreens/ProjectProvider";
 import {useGetProjectRequests} from "@/queries/project/useGetProjectRequests";
 import RequestSkeletonView from "@/components/SkeletonLayout/RequestSkeletonView";
+import {useMutation} from "convex/react";
+import {api} from "@/convex/_generated/api";
+import {updateProjectRequest} from "@/convex/projectRequests";
 
 // Helper for relative time (assuming standard date string)
 const formatRelativeTime = (date: number | string) => {
@@ -152,6 +155,8 @@ const ProjectRequestScreen = () => {
     const [filter, setFilter] = useState<'pending' | 'history'>('pending');
     const { projectId } = useProject();
 
+    const updateRequest = useMutation(api.projectRequests.updateProjectRequest)
+
     const data= useGetProjectRequests(projectId);
 
     // Memoized filtering logic
@@ -216,10 +221,19 @@ const ProjectRequestScreen = () => {
                             item={item}
                             index={index}
                             projectId={projectId}
-                            onAccept={(id: string) => {
-
+                            onAccept={async  (id: string) =>  {
+                                await updateRequest({
+                                    projectId: projectId,      // ensure this is in scope
+                                    requestId: item._id,
+                                    response: "accepted",
+                                })
                             }}
-                            onReject={(id: string) => {
+                            onReject={async (id: string) => {
+                                await updateRequest({
+                                    projectId: projectId,      // ensure this is in scope
+                                    requestId: item._id,
+                                    response: "rejected",
+                                })
 
                             }}
                         />
