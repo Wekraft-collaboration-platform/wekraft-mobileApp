@@ -6,11 +6,11 @@ import {useLocalSearchParams} from "expo-router";
 const editProjectScreen = () => {
     const { projectId } = useLocalSearchParams()
 
-  return (
-    <EditProjectScreen
-        projectId = {projectId}
-    />
-  );
+    return (
+        <EditProjectScreen
+            projectId = {projectId}
+        />
+    );
 };
 
 export default editProjectScreen;

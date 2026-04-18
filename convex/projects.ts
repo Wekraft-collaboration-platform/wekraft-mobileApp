@@ -140,15 +140,36 @@ export const getProjectById = query({
     }
 
     const project = await ctx.db.get(args.projectId);
-    
+
     // Optional: You might want to check if the user is the owner
     // const user = ... get user ...
     // if (project.ownerId !== user._id) throw new Error("Unauthorized");
-    
+
     return project;
   },
 });
 
+export const getProjectsBySelectedIds = query({
+  args: {
+    ids: v.array(v.id("projects")), // or v.id("projects") if you strictly pass IDs
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return [];
+    }
+
+    // Map through the IDs and fetch each project
+    const projectPromises = args.ids.map((id) =>
+        ctx.db.get(id as any) // Type cast if necessary for the specific table
+    );
+
+    const projects = await Promise.all(projectPromises);
+
+    // Filter out any null values in case a project was deleted but the ID remained in the user's featured list
+    return projects.filter((project) => project !== null);
+  },
+});
 export const updateThumbnail = mutation({
   args: {
     projectId: v.id("projects"),

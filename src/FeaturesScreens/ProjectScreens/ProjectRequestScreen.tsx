@@ -7,6 +7,9 @@ import { router } from 'expo-router';
 import {useProject} from "@/src/FeaturesScreens/ProjectScreens/ProjectProvider";
 import {useGetProjectRequests} from "@/queries/project/useGetProjectRequests";
 import RequestSkeletonView from "@/components/SkeletonLayout/RequestSkeletonView";
+import {useMutation} from "convex/react";
+import {api} from "@/convex/_generated/api";
+import {updateProjectRequest} from "@/convex/projectRequests";
 
 // Helper for relative time (assuming standard date string)
 const formatRelativeTime = (date: number | string) => {
@@ -18,7 +21,7 @@ const formatRelativeTime = (date: number | string) => {
     if (diffInHours < 24) return `${diffInHours}h ago`;
     return `${Math.floor(diffInHours / 24)}d ago`;
 };
-const RequestCard = ({ item, index, onAccept, onReject }: any) => {
+const RequestCard = ({ item, index, onAccept, onReject ,projectId}: any) => {
     const isPending = item.status === 'pending';
 
     const statusConfig = {
@@ -41,10 +44,24 @@ const RequestCard = ({ item, index, onAccept, onReject }: any) => {
                 <View className="flex-row justify-between items-start mb-5">
                     <View className="flex-row items-center gap-3">
                         <View className="relative">
+                            <TouchableOpacity
+                                activeOpacity={0.6}
+                                onPress={()=>{
+                                    router.push({
+                                        pathname:`/project/${projectId}/publicProfile`,
+                                        params: { userId : item.userId, }
+                                    })
+
+                                }}
+                                className="w-12 h-12 rounded-2xl bg-zinc-800 border border-zinc-700"
+
+                            >
+
                             <Image
                                 source={{ uri: item.userImage || 'https://avatar.iran.liara.run/public/30' }}
                                 className="w-12 h-12 rounded-2xl bg-zinc-800 border border-zinc-700"
                             />
+                            </TouchableOpacity>
                             {/* Small Online/Active Indicator */}
                             <View className="absolute -bottom-1 -right-1 w-4 h-4 bg-zinc-900 rounded-full items-center justify-center">
                                 <View className="w-2.5 h-2.5 bg-emerald-500 rounded-full border border-zinc-900" />
@@ -138,6 +155,8 @@ const ProjectRequestScreen = () => {
     const [filter, setFilter] = useState<'pending' | 'history'>('pending');
     const { projectId } = useProject();
 
+    const updateRequest = useMutation(api.projectRequests.updateProjectRequest)
+
     const data= useGetProjectRequests(projectId);
 
     // Memoized filtering logic
@@ -201,10 +220,20 @@ const ProjectRequestScreen = () => {
                         <RequestCard
                             item={item}
                             index={index}
-                            onAccept={(id: string) => {
-
+                            projectId={projectId}
+                            onAccept={async  (id: string) =>  {
+                                await updateRequest({
+                                    projectId: projectId,      // ensure this is in scope
+                                    requestId: item._id,
+                                    response: "accepted",
+                                })
                             }}
-                            onReject={(id: string) => {
+                            onReject={async (id: string) => {
+                                await updateRequest({
+                                    projectId: projectId,      // ensure this is in scope
+                                    requestId: item._id,
+                                    response: "rejected",
+                                })
 
                             }}
                         />

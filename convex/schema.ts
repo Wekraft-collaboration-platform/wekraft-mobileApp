@@ -29,9 +29,10 @@ export default defineSchema({
 
     techStack: v.optional(v.array(v.string())),
 
+    featuredProjectIds: v.optional(v.array(v.id("projects"))),
+
     // Scocial Links
-    linkedIn: v.optional(v.string()),
-    twitter: v.optional(v.string()),
+    linkedin: v.optional(v.string()),
     website: v.optional(v.string()),
     github: v.optional(v.string()),
 

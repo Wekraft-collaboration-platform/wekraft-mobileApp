@@ -1,3 +1,4 @@
+
 import React, {useState} from 'react';
 import {View, Text} from 'react-native';
 import {router, useLocalSearchParams} from "expo-router";
@@ -5,30 +6,26 @@ import {ProjectProvider} from "@/src/FeaturesScreens/ProjectScreens/ProjectProvi
 import ProjectLayoutScreen from "@/src/FeaturesScreens/ProjectScreens/ProjectLayoutScreen";
 import {Id} from "@/convex/_generated/dataModel";
 
-const Index = () => {
+const userMode = () => {
     const {projectId} = useLocalSearchParams()
 
     return (
         <ProjectProvider projectId={projectId as Id<"projects">} mode={"user"}>
             <ProjectLayoutScreen
                 onCommits={() => {
-                    router.push(`/discovery/${projectId}/commitsScreen`)
+                    router.push(`/project/${projectId}/commitsScreen`)
 
                 }}
                 onPr={() => {
-                    router.push(`/discovery/${projectId}/prScreen`)
+                    router.push(`/project/${projectId}/prScreen`)
 
                 }}
                 onOpenIssue={() => {
-                    router.push(`/discovery/${projectId}/issueScreen`)
+                    router.push(`/project/${projectId}/issueScreen`)
 
                 }}
                 onRequestOpen={() => {
-                    router.push(`/discovery/${projectId}/requestScreen`)
-
-                }}
-                onOpenEditProject={()=>{
-                    console.log("Not Authorized")
+                    router.push(`/project/${projectId}/requestScreen`)
 
                 }}
                 onOpenEditAbout={(about) => {
@@ -41,4 +38,4 @@ const Index = () => {
 
 };
 
-export default Index;
+export default userMode;

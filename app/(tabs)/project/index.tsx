@@ -176,7 +176,7 @@ const Project = () => {
                 onPress={()=>{
                     console.log("Projects : " + Projects.length)
                     console.log("user Data : ",user?.limit)
-                    if(Projects.length >= user?.limit || 0){
+                    // if(Projects.length >= user?.limit || 0){
                         // Toast.show({
                         //   type: "error",
                         //   visibilityTime: 2000,
@@ -184,12 +184,12 @@ const Project = () => {
                         //   text1: "Limit Exceeded",
                         //   text2: "You have reached the maximum limit of projects",
                         // })
-                        setShowUpgradeModal(true)
+                        // setShowUpgradeModal(true)
                         // return
 
-                    }else{
+                    // }else{
                         router.push("/project/addNewProject")
-                    }
+                    // }
 
 
                 }}
@@ -421,7 +421,6 @@ const ProjectCard = ({item,onPress,onLongPress} : ProjectCardProps) => {
                             color:"#717682",
                             fontSize:14,
                             letterSpacing:1
-
                         }}>{item.description || "No Description is Provided"}</Text>
 
 

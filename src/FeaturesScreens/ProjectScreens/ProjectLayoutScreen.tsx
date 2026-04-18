@@ -22,12 +22,12 @@ import { MotiView } from "moti";
 type ProjectLayoutScreenProps = {
     onCommits: () => void;
     onPr: () => void;
-    // onOpenHealth: (check : boolean) => void;
+    onOpenEditProject: () => void;
     onOpenIssue: () => void;
     onOpenEditAbout : (about : string) => void;
     onRequestOpen : ( ) => void;
 }
-const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onRequestOpen}: ProjectLayoutScreenProps) => {
+const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onRequestOpen,onOpenEditProject}: ProjectLayoutScreenProps) => {
     const {project,projectId, mode,user} = useProject()
     const { user : userData, isLoaded } = useUser();
 
@@ -194,10 +194,8 @@ const ProjectLayoutScreen = ({onCommits, onPr, onOpenIssue,onOpenEditAbout,onReq
                             items={[
                                 {
                                     label: "Edit project", onPress: () => {
-                                        router.push({
-                                            pathname: `/project/${projectId}/editProjectScreen`,
-                                            params: { projectId },
-                                        })
+                                        onOpenEditProject()
+
                                     }
                                 },
                                 { label: "AI actions", onPress: () => { } },

@@ -1,4 +1,4 @@
-import {Tabs, useSegments} from "expo-router";
+import {Tabs, usePathname, useSegments} from "expo-router";
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 import {LinearGradient} from "expo-linear-gradient";
 import {colors} from "@/constraints/Colors";
@@ -11,9 +11,17 @@ const TAB_BAR_HEIGHT = 100;
 
 export default function RootLayout() {
 
-    const segments = useSegments()
+    const segments = useSegments();
+    const pathname = usePathname();
+
+    useEffect(() => {
+        console.log("PATH:", pathname);
+        console.log("SEGMENTS:", segments);
+    }, [segments, pathname]);
+
+
     const hideTabBar =
-        ((segments[1] ==="project" || segments[1]==="discovery") && segments[2] !==undefined)
+        ((segments[1] ==="project" || segments[1]==="discovery" || segments[1] ==="profile") && segments[2] !==undefined)
 
 
     const translateY =useRef(new Animated.Value(0)).current
@@ -94,6 +102,19 @@ export default function RootLayout() {
                         tabBarIcon: ({ focused }) => (
                             <Ionicons
                                 name={focused ? "search" : "search-outline"}
+                                size={24}
+                                color={focused ? "#fff" : "#a0a0a0ff"}
+                            />
+                        ),
+                    }}
+                />
+
+                <Tabs.Screen
+                    name="profile"
+                    options={{
+                        tabBarIcon: ({ focused }) => (
+                            <Ionicons
+                                name={focused ? "person-circle" : "person-circle-outline"}
                                 size={24}
                                 color={focused ? "#fff" : "#a0a0a0ff"}
                             />
