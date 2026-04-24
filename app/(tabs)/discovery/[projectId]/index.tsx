@@ -27,6 +27,10 @@ const Index = () => {
                     router.push(`/discovery/${projectId}/requestScreen`)
 
                 }}
+                onOpenEditProject={()=>{
+                    console.log("Not Authorized")
+
+                }}
                 onOpenEditAbout={(about) => {
                     console.log("Not Authorized")
                 }}

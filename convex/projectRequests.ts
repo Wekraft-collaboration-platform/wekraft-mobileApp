@@ -1,7 +1,6 @@
-
 import {ConvexError, v} from "convex/values";
 import {mutation, query} from "./_generated/server";
-
+import {setRateLimit} from "./Redis/GitHubData/GithubToken";
 
 export const getProjectRequests = query({
     args:{
@@ -13,6 +12,7 @@ export const getProjectRequests = query({
         if(!identity) {
             throw  new Error("Calling getProjects Unauthenticated")
         }
+
 
 
         // Is User exixits
@@ -53,8 +53,6 @@ export const getProjectRequests = query({
 
 })
 
-
-
 export const sendProjectRequest = mutation({
     args:{
         projectId : v.id("projects"),
@@ -70,6 +68,7 @@ export const sendProjectRequest = mutation({
         if(!identity) {
             throw  new Error("Calling sendRequest Unauthenticated")
         }
+
 
 
         // Is User exixits
@@ -115,6 +114,60 @@ export const sendProjectRequest = mutation({
         console.log("Request send")
 
         return
+
+
+
+    }
+})
+
+export const updateProjectRequest = mutation({
+    args:{
+        projectId : v.id("projects"),
+        requestId:v.id("projectJoinRequests"),
+        response : v.union(
+            v.literal("pending"),
+            v.literal("accepted"),
+            v.literal("rejected"),
+        ),
+    },
+    handler : async (ctx,args) => {
+        // Auth
+        const identity = await ctx.auth.getUserIdentity()
+        if(!identity) {
+            throw  new Error("Calling sendRequest Unauthenticated")
+        }
+
+
+        // Is User exixits
+        const user = await  ctx.db.query("users")
+            .withIndex("by_clerkId",(c)=>c.eq("clerkId",identity.subject))
+            .first()
+
+        if(!user){
+            throw  new Error("Calling sendRequest User not found")
+        }
+
+        // is Project Exitis
+        const project = await ctx.db.query("projects")
+            .withIndex("by_id",(c)=>c.eq("_id",args.projectId))
+            .first()
+
+        if(!project){
+            throw  new Error("Calling sendRequest Project not found")
+        }
+
+        // Check if request Exixst
+        const request = await ctx.db.query("projectJoinRequests")
+            .withIndex("by_project",(c)=>c.eq("projectId",args.projectId))
+            .first()
+
+        if(!request){
+            throw new ConvexError("Request Not Found")
+        }
+
+        return await ctx.db.patch(args.requestId,{
+            status:args.response
+        })
 
 
 

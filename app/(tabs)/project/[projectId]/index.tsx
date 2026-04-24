@@ -8,8 +8,6 @@ import {Id} from "@/convex/_generated/dataModel";
 const Index = () => {
     const {projectId} = useLocalSearchParams()
 
-    const  [openProjectHealthDialog, setOpenProjectHealthDialog] = useState(false);
-
     return (
         <ProjectProvider projectId={projectId as Id<"projects">} mode={"admin"}>
             <ProjectLayoutScreen
@@ -28,6 +26,12 @@ const Index = () => {
                 onRequestOpen={() => {
                     router.push(`/project/${projectId}/requestScreen`)
 
+                }}
+                onOpenEditProject={()=>{
+                    router.push({
+                        pathname: `/project/${projectId}/editProjectScreen`,
+                        params: { projectId },
+                    })
                 }}
                 onOpenEditAbout={(about) => {
                     router.push({

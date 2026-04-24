@@ -1,5 +1,6 @@
 import {ConvexError, v} from "convex/values";
 import { mutation, query } from "./_generated/server";
+import {setRateLimit} from "./Redis/GitHubData/GithubToken";
 
 export const create = mutation({
   args: {
@@ -104,6 +105,7 @@ export const getProjects = query({
       return [];
     }
 
+
     const user = await ctx.db
       .query("users")
         .withIndex("by_clerkId", (q) =>
@@ -140,15 +142,37 @@ export const getProjectById = query({
     }
 
     const project = await ctx.db.get(args.projectId);
-    
+
     // Optional: You might want to check if the user is the owner
     // const user = ... get user ...
     // if (project.ownerId !== user._id) throw new Error("Unauthorized");
-    
+
     return project;
   },
 });
 
+export const getProjectsBySelectedIds = query({
+  args: {
+    ids: v.array(v.id("projects")), // or v.id("projects") if you strictly pass IDs
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return [];
+    }
+
+
+    // Map through the IDs and fetch each project
+    const projectPromises = args.ids.map((id) =>
+        ctx.db.get(id as any) // Type cast if necessary for the specific table
+    );
+
+    const projects = await Promise.all(projectPromises);
+
+    // Filter out any null values in case a project was deleted but the ID remained in the user's featured list
+    return projects.filter((project) => project !== null);
+  },
+});
 export const updateThumbnail = mutation({
   args: {
     projectId: v.id("projects"),
@@ -239,6 +263,7 @@ export const updateProject = mutation({
       throw new Error("Unauthenticated");
     }
 
+
     console.log("Update Project is Running at : ", Date.now())
 
     const user = await ctx.db
@@ -299,6 +324,7 @@ export const updateAbout = mutation({
       throw new Error("Unauthenticated");
     }
 
+
     const user = await ctx.db
       .query("users")
         .withIndex("by_clerkId", (q) =>
@@ -340,6 +366,7 @@ export const deleteProject = mutation({
     if (!identity) {
       throw new Error("Unauthenticated");
     }
+
 
     const user = await ctx.db
       .query("users")
