@@ -6,7 +6,7 @@ import {useQuery} from "@tanstack/react-query";
 export function useGithubLanguages(owner: string, repo: string) {
     // 1️⃣ Get the Convex action runner
     const runLanguages = useAction(
-        api.github.fetchRepoLanguages
+        api.Redis.GitHubData.RedisGetRepoLanguges.RedisFetchRepoLanguages
     );
 
     // 2️⃣ TanStack Query wrapper
@@ -20,8 +20,8 @@ export function useGithubLanguages(owner: string, repo: string) {
             }),
 
         enabled : Boolean(owner && repo),
-        staleTime: 10 * 60 * 1000,   // 5 minutes
-        gcTime: 10 * 60 * 1000,  // keep unused cache
+        staleTime: 30 * 60 * 1000,   // 5 minutes
+        gcTime: 30 * 60 * 1000,  // keep unused cache
         retry: 1,
     });
 }

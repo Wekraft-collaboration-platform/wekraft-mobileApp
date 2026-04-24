@@ -38,8 +38,8 @@ const EditProjectScreen = ({projectId}:any) => {
     const [teamMembers, setTeamMembers] = useState<TeamMember[] | []>(ProjectData?.lookingForMembers || []);
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(false)
-    const SaveThumbnail = useAction(api.thumbnail.uploadThumbnail)
-    const deleteImage = useAction(api.thumbnail.deleteThumbnail)
+    const SaveThumbnail = useAction(api.amazonS3.uploadThumbnail)
+    const deleteImage = useAction(api.amazonS3.deleteThumbnail)
 
     useEffect(() => {
         if (!ProjectData) return

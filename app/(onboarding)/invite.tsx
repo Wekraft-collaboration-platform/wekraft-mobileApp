@@ -10,7 +10,7 @@ import { uriToArrayBuffer, getContentType } from '@/components/Helper/helper'
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 const Invite = () => {
   // const completeOnBoarding = useMutation(api.users.completeOnboarding)
-  const uploadThumbnial = useAction(api.thumbnail.uploadThumbnail)
+  const uploadThumbnial = useAction(api.amazonS3.uploadThumbnail)
   const createRepo = useMutation(api.repos.createRepository)
   const createProject = useMutation(api.projects.create)
   const updateUser = useMutation(api.users.updateUser)
@@ -18,10 +18,10 @@ const Invite = () => {
   const [invite, setInvite] = useState("")
   const { data, setData } = useOnboarding()
   const [settingUp, setSettingUp] = useState(false);
-  const {
-    data: collaborators,
-    isLoading,
-    error } = FetchRepoColbarator(data.selctedrepo?.ownerLogin!, data.selctedrepo?.name!)
+  // const {
+  //   data: collaborators,
+  //   isLoading,
+  //   error } = FetchRepoColbarator(data.selctedrepo?.ownerLogin!, data.selctedrepo?.name!)
 
   return (
 <LinearBackgroundProvider>
@@ -91,31 +91,31 @@ const Invite = () => {
 
         <View style={styles.divider} />
 
-        {/* Collaborators */}
-        {isLoading && (
-          <Text style={styles.muted}>Loading collaborators…</Text>
-        )}
+        {/*/!* Collaborators *!/*/}
+        {/*{isLoading && (*/}
+        {/*  <Text style={styles.muted}>Loading collaborators…</Text>*/}
+        {/*)}*/}
 
-        {error && (
-          <Text style={styles.error}>{error.message}</Text>
-        )}
+        {/*{error && (*/}
+        {/*  <Text style={styles.error}>{error.message}</Text>*/}
+        {/*)}*/}
 
-        {!isLoading && collaborators?.length === 0 && (
-          <Text style={styles.muted}>No collaborators</Text>
-        )}
+        {/*{!isLoading && collaborators?.length === 0 && (*/}
+        {/*  <Text style={styles.muted}>No collaborators</Text>*/}
+        {/*)}*/}
 
-        {collaborators?.map(c => (
-          <View key={c.id} style={styles.memberRow}>
-            <Image
-              source={{ uri: c.avatar_url }}
-              style={styles.avatarSmall}
-            />
-            <View>
-              <Text style={styles.memberName}>{c.login}</Text>
-              <Text style={styles.memberRole}>Collaborator</Text>
-            </View>
-          </View>
-        ))}
+        {/*{collaborators?.map(c => (*/}
+        {/*  <View key={c.id} style={styles.memberRow}>*/}
+        {/*    <Image*/}
+        {/*      source={{ uri: c.avatar_url }}*/}
+        {/*      style={styles.avatarSmall}*/}
+        {/*    />*/}
+        {/*    <View>*/}
+        {/*      <Text style={styles.memberName}>{c.login}</Text>*/}
+        {/*      <Text style={styles.memberRole}>Collaborator</Text>*/}
+        {/*    </View>*/}
+        {/*  </View>*/}
+        {/*))}*/}
       </View>
 
       {/* CompleteSetup Setup */}

@@ -1,6 +1,7 @@
 
 import {query} from "./_generated/server";
 import {v} from "convex/values";
+import {setRateLimit} from "./Redis/GitHubData/GithubToken";
 
 
 // ================================= ================================= =================================
@@ -70,6 +71,10 @@ export const searchAndRank = query({
     },
     handler: async (ctx, args) => {
         // Fetch all public projects
+
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthenticated");
+
         const allPublicProjects = await ctx.db
             .query("projects")
             .withIndex("by_public", (q) => q.eq("isPublic", true))

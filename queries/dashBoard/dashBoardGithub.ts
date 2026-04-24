@@ -4,6 +4,16 @@ import {useAction} from "convex/react";
 
 
 
+type GithubDashboard = {
+    totalCommits: number;
+    totalPRs: number;
+    totalMergedPRs: number;
+    totalIssuesClosed: number;
+    totalOpenIssues: number;
+    totalReviews: number;
+    accountAgeInYears: number;
+    accountCreatedAt: string;
+};
 
 function getMsUntilMidnight() {
     const now = new Date()
@@ -15,18 +25,25 @@ function getMsUntilMidnight() {
 }
 
 
-export const useGithubDashBoardInfo =(clerkId : string, githubName:string)=>{
-    const fetchGithubDashBoardData = useAction(api.github.getDashboardStats)
-    return useQuery({
-            queryKey : ["DashBoardStat",githubName,clerkId],
-            queryFn: async()=> {
-               return await fetchGithubDashBoardData({clerkId,githubName})
-            },
-            staleTime: getMsUntilMidnight(),   // fresh until midnight
-            gcTime: 24 * 60 * 60 * 1000,
+export const useGithubDashBoardInfo = (
+    clerkId: string,
+    githubName: string
+) => {
+    const fetchGithubDashBoardData =
+        useAction(api.Redis.GitHubData.RedisGithubDashboard.RedisGetGithubDashboard) as (
 
-            enabled : Boolean(clerkId && githubName),
-            retry : 1
-        }
-    )
-}
+            args: { clerkId: string,githubName: string }
+        ) => Promise<GithubDashboard>;
+
+    return useQuery<GithubDashboard>({
+        queryKey: ["DashBoardStat", githubName, clerkId],
+
+        queryFn: async () => {
+            return await fetchGithubDashBoardData({ clerkId, githubName });
+        },
+
+        staleTime: 5 * 60 * 1000, // 5 min (match Redis)
+        gcTime: 10 * 60 * 1000,
+        retry: 1,
+    });
+};

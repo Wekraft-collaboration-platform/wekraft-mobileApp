@@ -3,7 +3,7 @@ import {useQuery} from "@tanstack/react-query";
 import {api} from "@/convex/_generated/api";
 
 export function useGetProjectHealthScore(projectId: any) {
-    const getScore = useAction(api.projecthealth.getProjectHealthScore)
+    const getScore = useAction(api.Redis.ProjectHealthScore.projecthealth.getProjectHealthScore)
 
     return useQuery({
         queryKey:["ProjectHealthScore",projectId],

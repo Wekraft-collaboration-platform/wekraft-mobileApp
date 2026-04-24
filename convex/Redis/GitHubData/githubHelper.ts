@@ -1,6 +1,7 @@
 // convex/githubHelpers.ts
 import { createClerkClient } from "@clerk/backend";
 import { Octokit } from "octokit";
+import {redis} from "../../redisClient";
 
 const clerk = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY!,
@@ -58,3 +59,6 @@ export async function fetchUserContributionsRaw(
 
   return response.user.contributionsCollection.contributionCalendar;
 }
+
+
+
