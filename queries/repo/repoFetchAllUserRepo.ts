@@ -2,27 +2,23 @@ import {useAction} from "convex/react";
 import {api} from "@/convex/_generated/api";
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {GithubRepo} from "@/constraints/interface";
+import {RedisFetchGithubRepos} from "@/convex/Redis/GitHubData/RedisGithubRepos";
 
 
 export function repoFetchAllUserRepo(){
     const runGetRepos = useAction(
-        api.github.fetchGithubRepos
+        api.Redis.GitHubData.RedisGithubRepos.RedisFetchGithubRepos
     );
 
     return useQuery({
         queryKey: ["githubRepos"],
-        queryFn: () =>
-            runGetRepos(),
-
-        // CRITICAL CONFIG
-        staleTime: Infinity,          // never stale
-        gcTime: Infinity,             // never garbage collected
-
-        // DISABLE AUTOMATIC REFETCHES
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-        retry: 1,
+        queryFn: () => runGetRepos(),
+        // staleTime: Infinity,
+        // gcTime: Infinity,
+        // refetchOnMount: false,
+        // refetchOnWindowFocus: false,
+        // refetchOnReconnect: false,
+        // retry: 1,
     });
 }
 

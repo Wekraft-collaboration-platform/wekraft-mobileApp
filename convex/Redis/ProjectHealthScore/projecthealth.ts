@@ -1,15 +1,13 @@
-"use node";
-
 import {v} from "convex/values";
-import { action } from "./_generated/server";
-import {api} from "./_generated/api";
-
+import { action } from "../../_generated/server";
+import {api} from "../../_generated/api";
 
 import {
     calculateActivityMomentumScore,
     calculateCommunityTrustScore,
     calculateFreshnessScore
 } from "./projecthealthhelper";
+import {setRateLimit} from "../GitHubData/GithubToken";
 
 
 type HealthHistoryEntry = {
@@ -20,6 +18,7 @@ type HealthHistoryEntry = {
 // ==========================================
 // maintenanceQuality (0–35) SCORE AI
 // ===========================================
+
 async function calculateMaintenanceQualityScore(
     description: string,
     about: string,
@@ -87,6 +86,7 @@ export const getProjectHealthScore = action({
             throw new Error("Call the get ProjectHealthScroe with out Authenticate")
         }
 
+        await setRateLimit("ProjectHealthScore",identity.subject)
         const ProjectData = await ctx.runQuery(api.projects.getProjectById,{
             projectId:args.projectId
         })
@@ -98,11 +98,11 @@ export const getProjectHealthScore = action({
 
         // 1. Fetch live activity data from GitHub
         const [projectHealth, projectLanguages] = await Promise.all([
-            ctx.runAction(api.github.getProjectHealthData, {
+            ctx.runAction(api.Redis.GitHubData.RedisGetProjectHealthData.RedisGetProjectHealthData, {
                 owner: ProjectData.repoOwner,
                 repo: ProjectData.repoName,
             }),
-            ctx.runAction(api.github.fetchRepoLanguages, {
+            ctx.runAction(api.Redis.GitHubData.RedisGetRepoLanguges.RedisFetchRepoLanguages, {
                 owner: ProjectData.repoOwner,
                 repo: ProjectData.repoName,
             })

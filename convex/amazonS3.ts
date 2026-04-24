@@ -1,5 +1,3 @@
-"use node";
-
 import { Buffer } from "buffer";
 import { action } from "./_generated/server";
 import { v } from "convex/values";
@@ -8,6 +6,7 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
+import {setRateLimit} from "./Redis/GitHubData/GithubToken";
 
 const s3 = new S3Client({
   region: "eu-north-1",
@@ -24,12 +23,14 @@ export const uploadThumbnail = action({
     fileData: v.bytes(),
   },
   handler: async (ctx, args) => {
-    console.log("Upload Image is Running at : ", Date.now())
 
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Unauthorized");
     }
+
+    await setRateLimit("uploadThumbnail",identity.subject)
+
 
     const safeName = args.fileName.replace(/[^a-zA-Z0-9.\-_]/g, "_");
     const key = `thumbnails/${Date.now()}-${safeName}`;
@@ -43,9 +44,6 @@ export const uploadThumbnail = action({
         CacheControl: "no-store",
       })
     );
-
-
-    console.log("Upload Image is Finshed at : ", Date.now())
 
 
     return {
@@ -62,8 +60,17 @@ export const deleteThumbnail = action({
   args: {
     key: v.string(),
   },
-  handler: async (_, args) => {
-    console.log("Delete Image is Running at : ", Date.now())
+  handler: async (ctx, args) => {
+
+
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+
+    await setRateLimit("deleteThumbnail",identity.subject)
+
     await s3.send(
       new DeleteObjectCommand({
         Bucket: "we-kraft",
@@ -71,7 +78,6 @@ export const deleteThumbnail = action({
       })
     );
 
-    console.log("Delete Image is Finshed at : ", Date.now())
     return { success: true };
   },
 });

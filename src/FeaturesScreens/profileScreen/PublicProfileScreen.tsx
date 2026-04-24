@@ -30,7 +30,7 @@ type PublicProfileScreenProps = {
 
 const PublicProfileScreen = ({ onProjectSelected }: PublicProfileScreenProps) => {
     const { user, mode } = useProfile();
-    const fetchTechStack = useAction(api.github.getUserTopLanguages);
+    const fetchTechStack = useAction(api.Redis.GitHubData.RedisGetUserTopLanguges.RedisGetUserTopLanguages);
     const updateUser = useMutation(api.users.updateUser);
 
     const [isSyncing, setIsSyncing] = useState(false);

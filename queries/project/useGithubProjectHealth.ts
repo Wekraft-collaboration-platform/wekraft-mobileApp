@@ -6,7 +6,7 @@ import {useQuery} from "@tanstack/react-query";
 export function useGithubProjectHealth(owner: string, repo: string) {
     // 1️⃣ Get the Convex action runner
     const runProjectHealth = useAction(
-        api.github.getProjectHealthData
+        api.Redis.GitHubData.RedisGetProjectHealthData.RedisGetProjectHealthData
     );
 
     // 2️⃣ TanStack Query wrapper
@@ -18,8 +18,8 @@ export function useGithubProjectHealth(owner: string, repo: string) {
                 repo,
             }),
         enabled : Boolean(owner && repo),
-        // staleTime: 1 * 60 * 1000,   // 5 minutes
-        // gcTime: 1 * 60 * 1000,  // keep unused cache
+        staleTime: 30 * 60 * 1000,   // 5 minutes
+        gcTime: 30 * 60 * 1000,  // keep unused cache
         retry: 1,
     });
 }

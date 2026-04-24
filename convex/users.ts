@@ -1,6 +1,8 @@
 import { internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { getGithubAccessToken } from "./githubHelper";
+import { getGithubAccessToken } from "./Redis/GitHubData/githubHelper";
+import {redis} from "./redisClient";
+import {setRateLimit} from "./Redis/GitHubData/GithubToken";
 
 /**
  * 📘 CONVEX CHEATSHEET: How to write Backend Functions
@@ -160,61 +162,6 @@ export const getUserbyId = query({
   },
 });
 
-
-
-
-
-export const connectGithub = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-        .query("users")
-         .withIndex("by_clerkId", (q) =>
-        q.eq("clerkId", identity.subject)
-      )
-        .unique();
-
-    if (!user) throw new Error("User not found");
-
-    const token = await getGithubAccessToken(identity.subject);
-
-    await ctx.db.patch(user._id, {
-      githubAccessToken: token,
-      updatedAt: Date.now(),
-    });
-  },
-});
-
-
-// =========================================
-// SET GITHUB ACCESS TOKEN
-// =========================================
-export const setGithubToken = mutation({
-  args: { token: v.string() },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthenticated");
-
-    const user = await ctx.db
-        .query("users")
-        .withIndex("by_clerkId", (q) =>
-            q.eq("clerkId", identity.subject)
-        )
-        .unique();
-
-    if (!user) throw new Error("User not found");
-
-    await ctx.db.patch(user._id, {
-      githubAccessToken: args.token,
-      updatedAt: Date.now(),
-    });
-  },
-});
-
-
 // =========================================
 // COMPLETE ONBOARDING
 // =========================================
@@ -266,11 +213,15 @@ export const updateUser = mutation({
 
 
   },
+
+
   handler : async (ctx,args)=>{
     const identity = await ctx.auth.getUserIdentity()
     if(!identity){
       throw new Error("Called updateUser without authentication present")
     }
+
+
 
     const user = await ctx.db
         .query("users")
@@ -282,6 +233,7 @@ export const updateUser = mutation({
     if (!user) {
       throw new Error("User not found");
     }
+
 
     const updates: any = {
       updatedAt: Date.now(),
@@ -306,31 +258,11 @@ export const updateUser = mutation({
     if (args.issues !== undefined) updates.issues = args.issues
     if (args.impactScore !== undefined) updates.impactScore = args.impactScore
 
+
+    if (user.updatedAt && (Date.now() - user.updatedAt < 5000)) {
+      throw new Error("Too frequent updates");
+    }
+
     await ctx.db.patch(user._id, updates)
   }
 })
-
-
-// =========================================
-// Get Github Token
-// =========================================
-export const getGithubToken = query({
-    args: {},
-    handler: async (ctx) => {
-        const identity = await ctx.auth.getUserIdentity();
-
-        // console.log("User : ", user)
-        if (!identity) return null;
-
-
-
-      const dbUser = await ctx.db
-          .query("users")
-          .withIndex("by_clerkId", (q) =>
-              q.eq("clerkId", identity.subject)
-          )
-          .first();
-
-        return dbUser?.githubAccessToken ?? null;
-    },
-});
