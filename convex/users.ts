@@ -83,7 +83,7 @@ export const store = mutation({
     // Create new user
     return await ctx.db.insert("users", {
       name: identity.name ?? "Anonymous",
-      clerkToken: identity.subject,
+      clerkToken: identity.tokenIdentifier,
       email: identity.email ?? "",
       avatarUrl: identity.pictureUrl ?? undefined,
 
@@ -157,37 +157,6 @@ export const getUserbyId = query({
         .unique();
 
     return user ?? null;
-  },
-});
-
-// =========================================
-// COMPLETE ONBOARDING
-// =========================================
-export const completeOnboarding = mutation({
-  args: {}, // No args needed for now, just a status flip
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity) {
-      throw new Error(
-        "Called completeOnboarding without authentication present"
-      );
-    }
-
-    const user = await ctx.db
-        .query("users")
-        .withIndex("by_token", (q) =>
-            q.eq("clerkToken", identity.subject)
-        )
-        .unique();
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    await ctx.db.patch(user._id, {
-      hasCompletedOnboarding: true,
-    });
   },
 });
 
@@ -268,3 +237,212 @@ export const updateUser = mutation({
     await ctx.db.patch(user._id, updates)
   }
 })
+
+
+
+// ==============================
+// UPDATES USER FOR ONBOARDING
+// =============================
+
+export const updateUserPrimaryUsage = mutation({
+  args: { purposes: v.array(v.string()) },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+
+    const user = await ctx.db
+        .query("users")
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.tokenIdentifier),
+        )
+        .unique();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    await ctx.db.patch(user._id, {
+      primaryUsage: args.purposes,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const updateUserIdentity = mutation({
+  args: {
+    name: v.string(),
+    occupation: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("unauthorized");
+    }
+
+    const currentUser = await ctx.db
+        .query("users")
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.tokenIdentifier),
+        )
+        .unique();
+
+    if (!currentUser) throw new Error("User not found");
+
+    if (args.name.length < 3 || args.name.length > 20) {
+      throw new Error("Username must be between 3 and 20 characters");
+    }
+
+    // Check if name is already taken by a diff user
+    const existingUserWithName = await ctx.db
+        .query("users")
+        .withIndex("by_name", (q) => q.eq("name", args.name))
+        .unique();
+
+    if (existingUserWithName && existingUserWithName._id !== currentUser._id) {
+      throw new Error("Username is already taken");
+    }
+
+    await ctx.db.patch(currentUser._id, {
+      name: args.name,
+      occupation: args.occupation,
+    });
+  },
+});
+
+export const completeOnboarding = mutation({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const user = await ctx.db
+        .query("users")
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.tokenIdentifier),
+        )
+        .unique();
+
+    if (!user) throw new Error("User not found");
+
+    await ctx.db.patch(user._id, {
+      hasCompletedOnboarding: true,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// ==============================
+// UPGRADE ACCOUNT (Usage for Coupons/Payments)
+// =============================
+export const upgradeAccount = mutation({
+  args: {
+    plan: v.union(v.literal("plus"), v.literal("pro")),
+    durationDays: v.optional(v.number()), // e.g., 7 days for a 1-week coupon
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const user = await ctx.db
+        .query("users")
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.tokenIdentifier),
+        )
+        .unique();
+
+    if (!user) throw new Error("User not found");
+
+    let planExpiry = undefined;
+    if (args.durationDays) {
+      planExpiry = Date.now() + args.durationDays * 24 * 60 * 60 * 1000;
+    }
+
+    await ctx.db.patch(user._id, {
+      accountType: args.plan,
+      planExpiry,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true, plan: args.plan, expires: planExpiry };
+  },
+});
+
+// =======================================
+// UPDATE USER PROFILE
+// =======================================
+export const updateUserBio = mutation({
+  args: { bio: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const user = await ctx.db
+        .query("users")
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.tokenIdentifier),
+        )
+        .unique();
+
+    if (!user) throw new Error("User not found");
+
+    await ctx.db.patch(user._id, {
+      bio: args.bio,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Add this to r:\wekraft-saas\convex\user.ts
+
+export const updateSocialLinks = mutation({
+  args: { links: v.array(v.string()) },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const user = await ctx.db
+        .query("users")
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.tokenIdentifier),
+        )
+        .unique();
+
+    if (!user) throw new Error("User not found");
+
+    const trimmedLinks = args.links.slice(0, 3);
+
+    await ctx.db.patch(user._id, {
+      socialLinks: trimmedLinks,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// ==================================
+// GET USER BY ID (name + avatar + accountType)
+// ==================================
+export const getUserById = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return null;
+    return {
+      name: user.name ?? "Unknown",
+      avatarUrl: user.avatarUrl ?? null,
+      accountType: user.accountType,
+    };
+  },
+});
+
+export const getUserByName = query({
+  args: { name: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+        .query("users")
+        .withIndex("by_name", (q) => q.eq("name", args.name))
+        .unique();
+  },
+});
+

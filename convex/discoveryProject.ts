@@ -63,70 +63,70 @@ export const fetchDefaultDiscoverProject = query({
 // =======================================
 // SEARCH AND RANK PROJECTS
 // =======================================
-export const searchAndRank = query({
-    args: {
-        query : v.optional(v.string()),
-        tags: v.optional(v.array(v.string())),
-        roles: v.optional(v.array(v.string())),
-    },
-    handler: async (ctx, args) => {
-        // Fetch all public projects
-
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new Error("Unauthenticated");
-
-        const allPublicProjects = await ctx.db
-            .query("projects")
-            .withIndex("by_public", (q) => q.eq("isPublic", true))
-            .collect();
-
-        // If no tags or roles provided, just return all public projects ranked
-        if (!args.tags && !args.roles && !args.query) {
-            return allPublicProjects.sort((a, b) => {
-                const scoreA = a.healthScore?.totalScore ?? 0;
-                const scoreB = b.healthScore?.totalScore ?? 0;
-                return scoreB - scoreA;
-            });
-        }
-
-        const filtered = allPublicProjects.filter((project) => {
-            const hasTags = args.tags && args.tags.length > 0;
-            const hasRoles = args.roles && args.roles.length > 0;
-            const hasQuery = args.query && args.query.trim().length > 0;
-
-            const normalize = (text: string) =>
-                text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-
-            let queryMatch = true;
-
-            if (hasQuery) {
-                const projectName = normalize(project.projectName);
-                const tokens = normalize(args.query!).split(" ");
-
-                queryMatch = tokens.every(token => projectName.includes(token));
-            }
-            let tagMatch = true;
-            if (hasTags) {
-                tagMatch = project.tags.some((tag) => args.tags!.includes(tag));
-            }
-
-            // Check roles match
-            let roleMatch = true;
-            if (hasRoles) {
-                roleMatch = project.lookingForMembers
-                    ? project.lookingForMembers.some((m) => args.roles!.includes(m.role))
-                    : false;
-            }
-
-            // Intersection (AND) logic: Must satisfy both if both are provided
-            return tagMatch && roleMatch && queryMatch;
-        });
-
-        // Rank by healthScore totalScore
-        return filtered.sort((a, b) => {
-            const scoreA = a.healthScore?.totalScore ?? 0;
-            const scoreB = b.healthScore?.totalScore ?? 0;
-            return scoreB - scoreA;
-        });
-    },
-});
+// export const searchAndRank = query({
+//     args: {
+//         query : v.optional(v.string()),
+//         tags: v.optional(v.array(v.string())),
+//         roles: v.optional(v.array(v.string())),
+//     },
+//     handler: async (ctx, args) => {
+//         // Fetch all public projects
+//
+//         const identity = await ctx.auth.getUserIdentity();
+//         if (!identity) throw new Error("Unauthenticated");
+//
+//         const allPublicProjects = await ctx.db
+//             .query("projects")
+//             .withIndex("by_public", (q) => q.eq("isPublic", true))
+//             .collect();
+//
+//         // If no tags or roles provided, just return all public projects ranked
+//         if (!args.tags && !args.roles && !args.query) {
+//             return allPublicProjects.sort((a, b) => {
+//                 const scoreA = a.healthScore?.totalScore ?? 0;
+//                 const scoreB = b.healthScore?.totalScore ?? 0;
+//                 return scoreB - scoreA;
+//             });
+//         }
+//
+//         const filtered = allPublicProjects.filter((project) => {
+//             const hasTags = args.tags && args.tags.length > 0;
+//             const hasRoles = args.roles && args.roles.length > 0;
+//             const hasQuery = args.query && args.query.trim().length > 0;
+//
+//             const normalize = (text: string) =>
+//                 text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+//
+//             let queryMatch = true;
+//
+//             if (hasQuery) {
+//                 const projectName = normalize(project.projectName);
+//                 const tokens = normalize(args.query!).split(" ");
+//
+//                 queryMatch = tokens.every(token => projectName.includes(token));
+//             }
+//             let tagMatch = true;
+//             if (hasTags) {
+//                 tagMatch = project.tags.some((tag) => args.tags!.includes(tag));
+//             }
+//
+//             // Check roles match
+//             let roleMatch = true;
+//             // if (hasRoles) {
+//             //     roleMatch = project.lookingForMembers
+//             //         ? project.lookingForMembers.some((m) => args.roles!.includes(m.role))
+//             //         : false;
+//             // }
+//
+//             // Intersection (AND) logic: Must satisfy both if both are provided
+//             return tagMatch && roleMatch && queryMatch;
+//         });
+//
+//         // Rank by healthScore totalScore
+//         return filtered.sort((a, b) => {
+//             const scoreA = a.healthScore?.totalScore ?? 0;
+//             const scoreB = b.healthScore?.totalScore ?? 0;
+//             return scoreB - scoreA;
+//         });
+//     },
+// });

@@ -5,13 +5,15 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import React from "react";
+import React, {useState} from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import Toast from "react-native-toast-message";
 
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 import { useOnboarding } from "@/context/OnBoardingContext";
+import {useMutation} from "convex/react";
+import {api} from "@/convex/_generated/api";
 
 const goals = [
   {
@@ -43,6 +45,7 @@ const goals = [
 const Index = () => {
   const { data, setData } = useOnboarding();
 
+  const updatePurposes = useMutation(api.users.updateUserPrimaryUsage)
   const selectedGoals = data.goals || [];
 
   const toggleGoal = (goalId: string) => {
@@ -62,18 +65,35 @@ const Index = () => {
       }));
     }
   };
+  const [loading, setLoading] = useState(false)
 
-  const handleContinue = () => {
-    // if (selectedGoals.length === 0) {
-    //   return Toast.show({
-    //     type: "error",
-    //     text1: "Select at least one option",
-    //     position: "bottom",
-    //   });
-    // }
+  const handleContinue = async () => {
+    if (loading) return
 
-    router.push("/(onboarding)/identity");
-  };
+    try {
+      setLoading(true)
+
+      // optional step
+      if (data.goals.length > 0) {
+        await updatePurposes({
+          purposes: data.goals
+        })
+      }
+
+      router.push("/(onboarding)/identity")
+
+    } catch (err) {
+
+      Toast.show({
+        type: "error",
+        text1: "Failed to save preferences",
+        position: "bottom"
+      })
+
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
       <LinearBackgroundProvider>

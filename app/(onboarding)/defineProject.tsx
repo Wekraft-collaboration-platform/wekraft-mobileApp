@@ -15,6 +15,10 @@ import Toast from "react-native-toast-message";
 
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 import { useOnboarding } from "@/context/OnBoardingContext";
+import {useMutation} from "convex/react";
+import {api} from "@/convex/_generated/api";
+import {nanoid} from "nanoid";
+import {showError} from "@/app/(onboarding)/identity";
 
 const PROJECT_STAGES = [
     {
@@ -55,15 +59,24 @@ const DefineProject = () => {
         setData,
     } = useOnboarding();
 
-    const handleContinue = () => {
-        if (
-            !data.projectName.trim()
-        ) {
-            return Toast.show({
-                type: "error",
-                text1: "Project name required",
-                position: "bottom",
-            });
+    const initProject = useMutation(api.projects.projectInitOnboarding);
+
+
+    const handleContinue =async  () => {
+
+        const projectName = data.projectName.trim()
+
+        const projectRegex =
+            /^[a-zA-Z0-9\s\-_]{3,40}$/
+
+        if (!projectName) {
+            return showError("Project name required")
+        }
+
+        if (!projectRegex.test(projectName)) {
+            return showError(
+                "Project name must be 3-40 valid characters"
+            )
         }
 
         if (!data.projectStage) {
@@ -73,6 +86,20 @@ const DefineProject = () => {
                 position: "bottom",
             });
         }
+
+        const inviteCode = nanoid(32)
+
+        await initProject({
+            projectName: data.projectName,
+            projectStatus: data.projectStage,
+            inviteLink: inviteCode,
+            isPublic: true
+        })
+
+        setData(prev => ({
+            ...prev,
+            inviteCode
+        }))
 
         router.push("/(onboarding)/invite");
     };

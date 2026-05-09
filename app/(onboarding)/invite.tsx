@@ -21,6 +21,7 @@ import { api } from "@/convex/_generated/api";
 
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 import { useOnboarding } from "@/context/OnBoardingContext";
+import {nanoid} from "nanoid";
 
 const Invite = () => {
   const {
@@ -31,6 +32,8 @@ const Invite = () => {
   const updateUser = useMutation(
       api.users.updateUser
   );
+
+  const completeOnboarding = useMutation(api.users.completeOnboarding);
 
   const [loading, setLoading] =
       useState(false);
@@ -67,19 +70,12 @@ const Invite = () => {
     try {
       setLoading(true);
 
+      await completeOnboarding()
 
-
-      await updateUser({
-        occupation: data.occupation,
-        onboardingCompleted: true,
-        primaryUsage: data.goals,
-        name : data.username,
-
-      });
 
       Toast.show({
         type: "success",
-        text1: "Project setup complete",
+        text1: "Profile setup complete",
         position: "bottom",
       });
 

@@ -23,6 +23,7 @@ import type * as Redis_ProjectHealthScore_projecthealth from "../Redis/ProjectHe
 import type * as Redis_ProjectHealthScore_projecthealthhelper from "../Redis/ProjectHealthScore/projecthealthhelper.js";
 import type * as amazonS3 from "../amazonS3.js";
 import type * as discoveryProject from "../discoveryProject.js";
+import type * as pricing from "../pricing.js";
 import type * as projectRequests from "../projectRequests.js";
 import type * as projects from "../projects.js";
 import type * as redisClient from "../redisClient.js";
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   "Redis/ProjectHealthScore/projecthealthhelper": typeof Redis_ProjectHealthScore_projecthealthhelper;
   amazonS3: typeof amazonS3;
   discoveryProject: typeof discoveryProject;
+  pricing: typeof pricing;
   projectRequests: typeof projectRequests;
   projects: typeof projects;
   redisClient: typeof redisClient;

@@ -73,17 +73,19 @@ export default defineSchema({
   // ===============================
   repositories: defineTable({
     githubId: v.int64(),
-    name: v.string(),
-    owner: v.string(),
-    fullName: v.string(),
-    url: v.string(),
-    // Relation to users table
+    isWebhookConnected: v.boolean(), // default false
+    repoName: v.string(),
+    repoOwner: v.string(),
+    repoFullName: v.string(),
+    repoType: v.optional(v.string()),
+    repoUrl: v.string(),
     userId: v.id("users"),
+    language: v.optional(v.any()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_user", ["userId"])
-    .index("by_github_id", ["githubId"]),
+      .index("by_user", ["userId"])
+      .index("by_github_id", ["githubId"]),
 
   // ===============================
   // REVIEWS TABLE
@@ -111,37 +113,53 @@ export default defineSchema({
   projects: defineTable({
     // Project details
     projectName: v.string(),
-    description: v.string(),
-    tags: v.array(v.string()), // Validation (2-5 tags) should be done in mutations
+    slug: v.string(), // Globally-unique, URL-safe slug (name + random suffix)
+    description: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())), // (2-5) // Validation (2-5 tags) should be done in mutations
     // Visibility
     isPublic: v.boolean(),
     // Linked repository
-    repositoryId: v.id("repositories"),
-    repoName: v.string(), // Denormalized for quick access
-    repoFullName: v.string(), // e.g., "ronitrai27/Line-Queue-PR-Agent"
-    repoOwner: v.string(),
-    repoUrl: v.string(),
+    projectLiveLink: v.optional(v.string()),
+
+    repositoryId: v.optional(v.id("repositories")),
+    repoName: v.optional(v.string()),
+    repoFullName: v.optional(v.string()),// e.g., "ronitrai27/Line-Queue-PR-Agent"
+    // repoOwner: v.string(),
+    // repoUrl: v.string(),
     thumbnailUrl: v.optional(v.string()),
-    lookingForMembers: v.optional(
-      v.array(
-        v.object({
-          role: v.string(),
-          type: v.union(
-            v.literal("casual"),
-            v.literal("part-time"),
-            v.literal("serious")
-          ),
-        })
-      )
-    ),
+    // lookingForMembers: v.optional(
+    //   v.array(
+    //     v.object({
+    //       role: v.string(),
+    //       type: v.union(
+    //         v.literal("casual"),
+    //         v.literal("part-time"),
+    //         v.literal("serious")
+    //       ),
+    //     })
+    //   )
+    // ),
     // Project owner (creator)
     ownerId: v.id("users"),
-    about: v.optional(v.string()),
-    // new details for the project to maintain community engaement
-    projectForks: v.optional(v.float64()),
-    projectStars: v.optional(v.float64()),
-    projectUpvotes: v.optional(v.float64()),
+    ownerName: v.string(),
+    ownerImage: v.string(),
 
+    // new details for the project to maintain community engaement
+    // projectForks: v.optional(v.float64()),
+    // projectStars: v.optional(v.float64()),
+
+    inviteLink: v.optional(v.string()),
+    projectWorkStatus: v.optional(
+        v.union(
+            v.literal("ideation"),
+            v.literal("validation"),
+            v.literal("development"),
+            v.literal("beta"),
+            v.literal("production"),
+            v.literal("scaling"),
+        ),
+    ),
+    projectUpvotes: v.number(),
 
     // HEATH SCORES SUPER IMPORTANT ----------------
     healthScore: v.optional(
@@ -166,10 +184,11 @@ export default defineSchema({
     updatedAt: v.number(),
   })
       .index("by_owner", ["ownerId"])
+      .index("by_owner_name", ["ownerId", "projectName"])
+      .index("by_slug", ["slug"])
       .index("by_repository", ["repositoryId"])
-      .index("by_repoUrl", ["repoUrl"])
-      .index("by_repoName",["repoName"])
-      .index("by_public", ["isPublic"]), // For discovering public projects
+      .index("by_public", ["isPublic"])
+      .index("by_invite_link", ["inviteLink"]),
 
   // ==============================
   // projectJoinRequests
@@ -194,4 +213,30 @@ export default defineSchema({
       .index("by_project", ["projectId"])
       .index("by_user", ["userId"])
       .index("by_status", ["status"]),
+
+
+
+
+
+  projectMembers: defineTable({
+    projectId: v.id("projects"),
+    userId: v.id("users"),
+    userName: v.string(),
+    userImage: v.optional(v.string()),
+    AccessRole: v.optional(
+        v.union(
+            v.literal("owner"),
+            v.literal("admin"),
+            v.literal("member"),
+            v.literal("viewer"),
+        ),
+    ),
+    joinedAt: v.optional(v.number()),
+    leftAt: v.optional(v.number()),
+  })
+      .index("by_project", ["projectId"])
+      .index("by_user", ["userId"])
+      .index("by_access_role", ["AccessRole"]),
+
 });
+

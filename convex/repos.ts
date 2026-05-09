@@ -42,14 +42,17 @@ export const createRepository = mutation({
     }
 
     const repositoryId = await ctx.db.insert("repositories", {
+      isWebhookConnected: false,
+      language: undefined,
+      repoType: "User",
       githubId: args.githubId,
-      name: args.name,
-      owner: args.owner,
-      fullName: args.fullName,
-      url: args.url,
+      repoName: args.name,
+      repoOwner: args.owner,
+      repoFullName: args.fullName,
+      repoUrl: args.url,
       userId: user._id,
       createdAt: Date.now(),
-      updatedAt: Date.now(),
+      updatedAt: Date.now()
     });
 
     console.log("Create Repo is Finshed at :", Date.now())

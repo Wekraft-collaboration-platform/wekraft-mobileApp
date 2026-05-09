@@ -11,7 +11,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { setAuthTransitionState } from "@/queries/auth/useAuthTransition";
 import { useQueryClient } from "@tanstack/react-query";
 import { PaperProvider } from "react-native-paper";
-
+import "react-native-get-random-values"
 export default function RootLayout() {
   return (
     <ClerkAndConvexProvider>

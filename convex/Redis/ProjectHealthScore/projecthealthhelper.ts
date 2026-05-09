@@ -78,26 +78,23 @@ export function calculateActivityMomentumScore({
 // COMMUNITY TRUST HEALTH SCORE (0-20)
 // ===========================================
 type CommunityTrustInput = {
-    projectStars: number | null;
-    projectForks: number | null;
     projectUpvotes: number | null;
 };
 
 export function calculateCommunityTrustScore({
-                                                 projectStars,
-                                                 projectForks,
                                                  projectUpvotes,
                                              }: CommunityTrustInput): number {
-    const stars = projectStars ?? 0;
-    const forks = projectForks ?? 0;
+    // const stars = projectStars ?? 0;
+    // const forks = projectForks ?? 0;
     const upvotes = projectUpvotes ?? 0;
 
     // Log scaling to avoid inflation
-    const starScore = Math.log10(stars + 1) * 4;    // max ~6
-    const forkScore = Math.log10(forks + 1) * 3;    // max ~4
+    // const starScore = Math.log10(stars + 1) * 4;    // max ~6
+    // const forkScore = Math.log10(forks + 1) * 3;    // max ~4
     const upvoteScore = Math.log10(upvotes + 1) * 7; // max ~10
 
-    const rawScore = starScore + forkScore + upvoteScore;
+    // const rawScore = starScore + forkScore + upvoteScore;
+    const rawScore = upvoteScore;
 
     // Normalize to 0–20
     return Math.max(0, Math.min(20, Math.round(rawScore)));

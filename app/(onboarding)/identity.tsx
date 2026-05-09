@@ -22,6 +22,8 @@ import { useUser } from "@clerk/clerk-expo";
 
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 import { useOnboarding } from "@/context/OnBoardingContext";
+import {useMutation} from "convex/react";
+import {api} from "@/convex/_generated/api";
 
 const occupations = [
     "Frontend Developer",
@@ -36,6 +38,18 @@ const occupations = [
     "Game Developer",
 ];
 
+
+export const showError = (
+    message: string
+) => {
+    Toast.show({
+        type: "error",
+        text1: message,
+        position: "bottom"
+    })
+}
+
+
 const Identity = () => {
     const {
         data,
@@ -43,6 +57,7 @@ const Identity = () => {
     } = useOnboarding();
 
     const user = useUser();
+    const updateIdentity = useMutation(api.users.updateUserIdentity)
 
     const [search, setSearch] = useState("");
 
@@ -70,7 +85,7 @@ const Identity = () => {
         );
     }, [search]);
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         if (
             !data.username.trim() ||
             !data.occupation.trim()
@@ -83,6 +98,31 @@ const Identity = () => {
                 position: "bottom",
             });
         }
+
+
+        try {
+
+            await updateIdentity({
+                name: data.username,
+                occupation: data.occupation
+            })
+
+            router.push("/(onboarding)/defineProject")
+
+        } catch (err: any) {
+
+            if (
+                err?.message?.toLowerCase().includes("username")
+            ) {
+                return showError("Username already taken")
+            }
+
+            showError("Failed to save identity")
+        }
+        await updateIdentity({
+            name: data.username,
+            occupation: data.occupation
+        })
 
         router.push("/(onboarding)/defineProject")
     };

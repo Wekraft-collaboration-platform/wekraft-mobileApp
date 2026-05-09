@@ -99,12 +99,13 @@ export const getProjectHealthScore = action({
         // 1. Fetch live activity data from GitHub
         const [projectHealth, projectLanguages] = await Promise.all([
             ctx.runAction(api.Redis.GitHubData.RedisGetProjectHealthData.RedisGetProjectHealthData, {
-                owner: ProjectData.repoOwner,
-                repo: ProjectData.repoName,
+                owner: ProjectData.ownerName,
+                repo: ProjectData.repoName ? ProjectData.repoName : " ",
+
             }),
             ctx.runAction(api.Redis.GitHubData.RedisGetRepoLanguges.RedisFetchRepoLanguages, {
-                owner: ProjectData.repoOwner,
-                repo: ProjectData.repoName,
+                owner: ProjectData.ownerName,
+                repo: ProjectData.repoName ? ProjectData.repoName : " ",
             })
         ])
 
@@ -117,12 +118,12 @@ export const getProjectHealthScore = action({
         const totalPr = projectHealth?.totalPRs ?? 0;
         const mergedPr = projectHealth?.mergedPRs ?? 0;
 
-        const projectAbout = ProjectData.about || "no about (readme/docs) provided by user yet";
+        const projectAbout = ProjectData.description || "no about (readme/docs) provided by user yet";
         const projectTags = ProjectData.tags || [];
         // @ts-ignore
         const projectlanguages = projectLanguages?.breakdown.map((lang) => lang.language) ?? [];
-        const projectStars = ProjectData.projectStars ?? 0;
-        const projectForks = ProjectData.projectForks ?? 0;
+        // const projectStars = ProjectData.projectStars ?? 0;
+        // const projectForks = ProjectData.projectForks ?? 0;
         const projectUpvotes = ProjectData.projectUpvotes ?? 0;
         const projectDescription = ProjectData.description || "no description provided by user yet";
 
@@ -130,7 +131,7 @@ export const getProjectHealthScore = action({
             velocity60Days,
             lastCommitDate,
             prMergeRate,
-            projectStars,
+            // projectStars,
         });
 
 
@@ -145,9 +146,7 @@ export const getProjectHealthScore = action({
         console.log("Activity Momentum:", activityMomentum);
 
         const communityTrust = calculateCommunityTrustScore({
-            projectStars: projectStars,
-            projectForks: projectForks,
-            projectUpvotes: projectUpvotes,
+            projectUpvotes: projectUpvotes
         });
         console.log("Community Trust:", communityTrust);
 
