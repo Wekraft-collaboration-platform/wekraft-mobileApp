@@ -17,7 +17,9 @@ export const getProjectRequests = query({
 
         // Is User exixits
         const user = await  ctx.db.query("users")
-            .withIndex("by_clerkId",(c)=>c.eq("clerkId",identity.subject))
+            .withIndex("by_token", (q) =>
+                q.eq("clerkToken", identity.subject)
+            )
             .first()
 
         if(!user){
@@ -73,7 +75,9 @@ export const sendProjectRequest = mutation({
 
         // Is User exixits
         const user = ctx.db.query("users")
-            .withIndex("by_clerkId",(c)=>c.eq("clerkId",identity.subject))
+            .withIndex("by_token", (q) =>
+                q.eq("clerkToken", identity.subject)
+            )
             .first()
 
         if(!user){
@@ -140,7 +144,9 @@ export const updateProjectRequest = mutation({
 
         // Is User exixits
         const user = await  ctx.db.query("users")
-            .withIndex("by_clerkId",(c)=>c.eq("clerkId",identity.subject))
+            .withIndex("by_token", (q) =>
+                q.eq("clerkToken", identity.subject)
+            )
             .first()
 
         if(!user){

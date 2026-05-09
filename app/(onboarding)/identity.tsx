@@ -5,81 +5,98 @@ import {
     TouchableOpacity,
     TextInput,
     FlatList,
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
 
-import React from "react";
+import React, {
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import Toast from "react-native-toast-message";
+import { useUser } from "@clerk/clerk-expo";
 
 import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
 import { useOnboarding } from "@/context/OnBoardingContext";
 
-const PROJECT_STAGES = [
-    {
-        id: "idea",
-        title: "Ideation",
-        icon: "bulb-outline",
-    },
-    {
-        id: "validation",
-        title: "Validation",
-        icon: "search-outline",
-    },
-    {
-        id: "development",
-        title: "Development",
-        icon: "code-slash-outline",
-    },
-    {
-        id: "beta",
-        title: "Beta",
-        icon: "rocket-outline",
-    },
-    {
-        id: "production",
-        title: "Production",
-        icon: "globe-outline",
-    },
-    {
-        id: "scaling",
-        title: "Scaling",
-        icon: "trending-up-outline",
-    },
+const occupations = [
+    "Frontend Developer",
+    "Backend Developer",
+    "Fullstack Developer",
+    "Android Developer",
+    "iOS Developer",
+    "UI/UX Designer",
+    "DevOps Engineer",
+    "Cybersecurity Engineer",
+    "Machine Learning Engineer",
+    "Game Developer",
 ];
 
-const DefineProject = () => {
+const Identity = () => {
     const {
         data,
         setData,
     } = useOnboarding();
 
+    const user = useUser();
+
+    const [search, setSearch] = useState("");
+
+    useEffect(() => {
+        if (
+            user?.user?.username &&
+            !data.username
+        ) {
+            setData((prev) => ({
+                ...prev,
+                username: user.user?.username || "",
+            }));
+        }
+    }, [user]);
+
+    const filteredOccupations = useMemo(() => {
+        if (!search.trim()) {
+            return occupations;
+        }
+
+        return occupations.filter((item) =>
+            item
+                .toLowerCase()
+                .includes(search.toLowerCase())
+        );
+    }, [search]);
+
     const handleContinue = () => {
         if (
-            !data.projectName.trim()
+            !data.username.trim() ||
+            !data.occupation.trim()
         ) {
             return Toast.show({
                 type: "error",
-                text1: "Project name required",
+                text1: "Missing Information",
+                text2:
+                    "Username and occupation are required",
                 position: "bottom",
             });
         }
 
-        if (!data.projectStage) {
-            return Toast.show({
-                type: "error",
-                text1: "Select a project stage",
-                position: "bottom",
-            });
-        }
-
-        router.push("/(onboarding)/invite");
+        router.push("/(onboarding)/defineProject")
     };
 
     return (
         <LinearBackgroundProvider>
-            <View style={styles.container}>
+            <KeyboardAvoidingView
+                style={styles.container}
+                behavior={
+                    Platform.OS === "ios"
+                        ? "padding"
+                        : undefined
+                }
+            >
                 {/* Progress */}
                 <View style={styles.progressWrapper}>
                     {[1, 2, 3, 4].map((item, index) => (
@@ -90,14 +107,14 @@ const DefineProject = () => {
                             <View
                                 style={[
                                     styles.progressCircle,
-                                    index <= 2 &&
+                                    index <= 1 &&
                                     styles.progressCircleActive,
                                 ]}
                             >
                                 <Text
                                     style={[
                                         styles.progressText,
-                                        index <= 2 &&
+                                        index <= 1 &&
                                         styles.progressTextActive,
                                     ]}
                                 >
@@ -114,67 +131,72 @@ const DefineProject = () => {
 
                 {/* Header */}
                 <View style={styles.header}>
-                    <Text style={styles.emoji}>🚀</Text>
+                    <Text style={styles.emoji}>✨</Text>
 
                     <Text style={styles.title}>
-                        Create your{"\n"}first project
+                        Create your{"\n"}identity
                     </Text>
 
                     <Text style={styles.subtitle}>
-                        Start building your workspace
-                        and collaborating with others.
+                        This is how people will discover
+                        and collaborate with you.
                     </Text>
                 </View>
 
-                {/* Project Name */}
+                {/* Username */}
                 <View style={styles.section}>
                     <Text style={styles.label}>
-                        Project Name
+                        Username
                     </Text>
 
                     <TextInput
-                        placeholder="Acme SaaS"
+                        value={data.username}
+                        placeholder="e.g. sahildev"
                         placeholderTextColor="#666"
-                        value={data.projectName}
                         onChangeText={(text) =>
                             setData((prev) => ({
                                 ...prev,
-                                projectName: text,
+                                username: text,
                             }))
                         }
                         style={styles.input}
                     />
                 </View>
 
-                {/* Status */}
+                {/* Search */}
                 <View style={styles.section}>
                     <Text style={styles.label}>
-                        Project Stage
+                        Occupation
                     </Text>
 
-                    <Text style={styles.helper}>
-                        Helps people understand where
-                        your project currently stands.
-                    </Text>
+                    <View style={styles.searchBox}>
+                        <Ionicons
+                            name="search-outline"
+                            size={18}
+                            color="#999"
+                        />
+
+                        <TextInput
+                            value={search}
+                            onChangeText={setSearch}
+                            placeholder="Search roles..."
+                            placeholderTextColor="#666"
+                            style={styles.searchInput}
+                        />
+                    </View>
                 </View>
 
-                {/* Stage Grid */}
+                {/* Occupations */}
                 <FlatList
-                    data={PROJECT_STAGES}
-                    keyExtractor={(item) => item.id}
-                    numColumns={2}
-                    columnWrapperStyle={{
-                        gap: 14,
-                    }}
-                    contentContainerStyle={{
-                        gap: 14,
-                        paddingBottom: 20,
-                        margin:10,
-                    }}
+                    data={filteredOccupations}
+                    keyExtractor={(item) => item}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={
+                        styles.listContainer
+                    }
                     renderItem={({ item }) => {
                         const isSelected =
-                            data.projectStage ===
-                            item.id;
+                            data.occupation === item;
 
                         return (
                             <TouchableOpacity
@@ -182,25 +204,25 @@ const DefineProject = () => {
                                 onPress={() =>
                                     setData((prev) => ({
                                         ...prev,
-                                        projectStage: item.id,
+                                        occupation: item,
                                     }))
                                 }
                                 style={[
-                                    styles.stageCard,
+                                    styles.roleCard,
                                     isSelected &&
-                                    styles.stageCardActive,
+                                    styles.roleCardActive,
                                 ]}
                             >
                                 <View
                                     style={[
-                                        styles.iconWrapper,
+                                        styles.roleIcon,
                                         isSelected &&
-                                        styles.iconWrapperActive,
+                                        styles.roleIconActive,
                                     ]}
                                 >
                                     <Ionicons
-                                        name={item.icon as any}
-                                        size={24}
+                                        name="code-slash-outline"
+                                        size={18}
                                         color={
                                             isSelected
                                                 ? "#000"
@@ -211,13 +233,21 @@ const DefineProject = () => {
 
                                 <Text
                                     style={[
-                                        styles.stageText,
+                                        styles.roleText,
                                         isSelected &&
-                                        styles.stageTextActive,
+                                        styles.roleTextActive,
                                     ]}
                                 >
-                                    {item.title}
+                                    {item}
                                 </Text>
+
+                                {isSelected && (
+                                    <Ionicons
+                                        name="checkmark-circle"
+                                        size={22}
+                                        color="white"
+                                    />
+                                )}
                             </TouchableOpacity>
                         );
                     }}
@@ -253,22 +283,23 @@ const DefineProject = () => {
                         />
                     </TouchableOpacity>
                 </View>
-            </View>
+            </KeyboardAvoidingView>
         </LinearBackgroundProvider>
     );
 };
 
-export default DefineProject;
+export default Identity;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+
     },
 
     progressWrapper: {
         flexDirection: "row",
-        alignSelf: "center",
         alignItems: "center",
+        alignSelf: "center",
         marginBottom: 40,
     },
 
@@ -311,19 +342,19 @@ const styles = StyleSheet.create({
     },
 
     header: {
-        marginBottom: 34,
+        marginBottom: 32,
     },
 
     emoji: {
         fontSize: 34,
-        marginBottom: 14,
+        marginBottom: 12,
     },
 
     title: {
         color: "white",
-        fontSize: 34,
+        fontSize: 36,
         fontWeight: "700",
-        lineHeight: 42,
+        lineHeight: 44,
     },
 
     subtitle: {
@@ -334,20 +365,14 @@ const styles = StyleSheet.create({
     },
 
     section: {
-        marginBottom: 18,
+        marginBottom: 20,
     },
 
     label: {
         color: "white",
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: "600",
-        marginBottom: 8,
-    },
-
-    helper: {
-        color: "#777",
-        fontSize: 13,
-        lineHeight: 20,
+        marginBottom: 10,
     },
 
     input: {
@@ -361,43 +386,69 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
 
-    stageCard: {
+    searchBox: {
+        height: 58,
+        borderRadius: 18,
+        paddingHorizontal: 18,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        backgroundColor: "rgba(255,255,255,0.05)",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.08)",
+    },
+
+    searchInput: {
         flex: 1,
-        minHeight: 120,
+        color: "white",
+        fontSize: 15,
+    },
+
+    listContainer: {
+        paddingBottom: 20,
+        gap: 12,
+        marginHorizontal:10
+    },
+
+    roleCard: {
+        minHeight: 76,
         borderRadius: 24,
-        padding: 18,
-        justifyContent: "space-between",
+        paddingHorizontal: 16,
+        flexDirection: "row",
+        alignItems: "center",
         backgroundColor: "rgba(255,255,255,0.04)",
         borderWidth: 1,
         borderColor: "rgba(255,255,255,0.08)",
     },
 
-    stageCardActive: {
+    roleCardActive: {
         backgroundColor: "rgba(255,255,255,0.09)",
         borderColor: "rgba(255,255,255,0.35)",
-        transform: [{ scale: 1.02 }],
+        transform: [{ scale: 1.01 }],
     },
 
-    iconWrapper: {
-        width: 48,
-        height: 48,
-        borderRadius: 16,
+    roleIcon: {
+        width: 44,
+        height: 44,
+        borderRadius: 14,
+        backgroundColor: "rgba(255,255,255,0.08)",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(255,255,255,0.08)",
     },
 
-    iconWrapperActive: {
+    roleIconActive: {
         backgroundColor: "white",
     },
 
-    stageText: {
+    roleText: {
+        flex: 1,
         color: "white",
         fontSize: 16,
         fontWeight: "600",
+        marginLeft: 14,
     },
 
-    stageTextActive: {
+    roleTextActive: {
         color: "white",
     },
 

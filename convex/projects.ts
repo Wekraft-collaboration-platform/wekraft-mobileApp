@@ -40,8 +40,8 @@ export const create = mutation({
 
     const user = await ctx.db
       .query("users")
-        .withIndex("by_clerkId", (q) =>
-            q.eq("clerkId", identity.subject)
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.subject)
         )
       .unique();
 
@@ -108,8 +108,8 @@ export const getProjects = query({
 
     const user = await ctx.db
       .query("users")
-        .withIndex("by_clerkId", (q) =>
-            q.eq("clerkId", identity.subject)
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.subject)
         )
       .unique();
 
@@ -186,8 +186,8 @@ export const updateThumbnail = mutation({
 
     const user = await ctx.db
       .query("users")
-        .withIndex("by_clerkId", (q) =>
-            q.eq("clerkId", identity.subject)
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.subject)
         )
       .unique();
 
@@ -268,8 +268,8 @@ export const updateProject = mutation({
 
     const user = await ctx.db
       .query("users")
-        .withIndex("by_clerkId", (q) =>
-            q.eq("clerkId", identity.subject)
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.subject)
         )
       .unique();
 
@@ -327,8 +327,8 @@ export const updateAbout = mutation({
 
     const user = await ctx.db
       .query("users")
-        .withIndex("by_clerkId", (q) =>
-            q.eq("clerkId", identity.subject)
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.subject)
         )
       .unique();
 
@@ -370,8 +370,8 @@ export const deleteProject = mutation({
 
     const user = await ctx.db
       .query("users")
-        .withIndex("by_clerkId", (q) =>
-            q.eq("clerkId", identity.subject)
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.subject)
         )
       .unique();
 

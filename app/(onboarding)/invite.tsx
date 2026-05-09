@@ -1,380 +1,497 @@
-import { View, Text, TouchableOpacity, TextInput, Image, StyleSheet, ActivityIndicator, Alert } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useAction, useMutation } from 'convex/react'
-import { api } from '@/convex/_generated/api'
-import { router } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { useOnboarding } from '@/context/OnBoardingContext'
-import { FetchRepoColbarator } from "@/queries/repo/repoColbarator"
-import { uriToArrayBuffer, getContentType } from '@/components/Helper/helper'
-import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
-const Invite = () => {
-  // const completeOnBoarding = useMutation(api.users.completeOnboarding)
-  const uploadThumbnial = useAction(api.amazonS3.uploadThumbnail)
-  const createRepo = useMutation(api.repos.createRepository)
-  const createProject = useMutation(api.projects.create)
-  const updateUser = useMutation(api.users.updateUser)
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  Share,
+} from "react-native";
 
-  const [invite, setInvite] = useState("")
-  const { data, setData } = useOnboarding()
-  const [settingUp, setSettingUp] = useState(false);
-  // const {
-  //   data: collaborators,
-  //   isLoading,
-  //   error } = FetchRepoColbarator(data.selctedrepo?.ownerLogin!, data.selctedrepo?.name!)
+import React, { useMemo, useState } from "react";
+
+import * as Clipboard from "expo-clipboard";
+
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import Toast from "react-native-toast-message";
+
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+
+import LinearBackgroundProvider from "@/providers/LinearBackgroundProvider";
+import { useOnboarding } from "@/context/OnBoardingContext";
+
+const Invite = () => {
+  const {
+    data,
+    setData,
+  } = useOnboarding();
+
+  const updateUser = useMutation(
+      api.users.updateUser
+  );
+
+  const [loading, setLoading] =
+      useState(false);
+
+  const inviteLink = useMemo(() => {
+    const slug = data.projectName
+        .toLowerCase()
+        .replace(/\s+/g, "-");
+
+    return `https://wekraft.app/invite/${slug}`;
+  }, [data.projectName]);
+
+  const copyInviteLink = async () => {
+    await Clipboard.setStringAsync(inviteLink);
+
+    Toast.show({
+      type: "success",
+      text1: "Invite link copied",
+      position: "bottom",
+    });
+  };
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Join my project on WeKraft 🚀\n${inviteLink}`,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const completeSetup = async () => {
+    try {
+      setLoading(true);
+
+
+
+      await updateUser({
+        occupation: data.occupation,
+        onboardingCompleted: true,
+        primaryUsage: data.goals,
+        name : data.username,
+
+      });
+
+      Toast.show({
+        type: "success",
+        text1: "Project setup complete",
+        position: "bottom",
+      });
+
+      router.replace("/(tabs)");
+    } catch (err) {
+      console.log(err);
+
+      Toast.show({
+        type: "error",
+        text1:
+            "Failed to complete setup",
+        position: "bottom",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-<LinearBackgroundProvider>
+      <LinearBackgroundProvider>
+        <View style={styles.container}>
+          {/* Progress */}
+          <View style={styles.progressWrapper}>
+            {[1, 2, 3, 4].map((item, index) => (
+                <View
+                    key={item}
+                    style={styles.progressItem}
+                >
+                  <View
+                      style={[
+                        styles.progressCircle,
+                        styles.progressCircleActive,
+                      ]}
+                  >
+                    <Text
+                        style={[
+                          styles.progressText,
+                          styles.progressTextActive,
+                        ]}
+                    >
+                      {item}
+                    </Text>
+                  </View>
 
-    <View
-      className='flex-1'
-    >
+                  {index !== 3 && (
+                      <View
+                          style={[
+                            styles.progressLine,
+                            styles.progressLineActive,
+                          ]}
+                      />
+                  )}
+                </View>
+            ))}
+          </View>
 
-      {/* Headers */}
-      <View className={"flex-row w-full justify-center items-center"}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          className='absolute left-0 top-0'
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={30} color="white" />
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.emoji}>🎉</Text>
 
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Collaboration</Text>
+            <Text style={styles.title}>
+              Your project{"\n"}is ready
+            </Text>
 
-        <TouchableOpacity className='absolute right-0 top-0'>
-          <Text style={styles.skipText}>Skip</Text>
-        </TouchableOpacity>
+            <Text style={styles.subtitle}>
+              Invite your friends or team
+              members to start collaborating.
+            </Text>
+          </View>
 
-      </View>
+          {/* Invite Link */}
+          <View style={styles.section}>
+            <Text style={styles.label}>
+              Invite Link
+            </Text>
 
-      {/* Title */}
-      <View style={styles.titleBlock}>
-        <Text style={styles.title}>Invite collaborators</Text>
-        <Text style={styles.subtitle}>
-          Add teammates to collaborate on this project.
-        </Text>
-      </View>
+            <View style={styles.linkBox}>
+              <TextInput
+                  editable={false}
+                  value={inviteLink}
+                  style={styles.linkInput}
+                  placeholderTextColor="#777"
+              />
 
-      {/* Invite */}
-      <View style={styles.inviteRow}>
-        <TextInput
-          value={invite}
-          onChangeText={setInvite}
-          placeholder="colleague@email.com"
-          placeholderTextColor="#777"
-          autoCapitalize="none"
-          autoCorrect={false}
-          style={styles.inviteInput}
-        />
+              <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={copyInviteLink}
+                  style={styles.copyButton}
+              >
+                <Ionicons
+                    name="copy-outline"
+                    size={18}
+                    color="#000"
+                />
 
-        <TouchableOpacity style={styles.inviteBtn}>
-          <Text style={styles.inviteText}>Invite</Text>
-        </TouchableOpacity>
-      </View>
+                <Text style={styles.copyText}>
+                  Copy
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-      {/* Members */}
-      <View style={styles.membersBlock}>
-        <Text style={styles.membersTitle}>Members</Text>
+          {/* Share Options */}
+          <View style={styles.shareSection}>
+            <View style={styles.shareDivider}>
+              <View style={styles.divider} />
 
-        {/* Owner */}
-        <View style={styles.memberRow}>
-          <Image
-            source={{ uri: data.selctedrepo?.ownerAvatar }}
-            style={styles.avatar}
-          />
-          <View>
-            <Text style={styles.memberName}>{data.selctedrepo?.ownerLogin}</Text>
-            <Text style={styles.memberRole}>Owner</Text>
+              <Text style={styles.shareText}>
+                Share Via
+              </Text>
+
+              <View style={styles.divider} />
+            </View>
+
+            <View style={styles.shareRow}>
+              <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={handleShare}
+                  style={styles.shareCard}
+              >
+                <Ionicons
+                    name="logo-whatsapp"
+                    size={28}
+                    color="#25D366"
+                />
+
+                <Text style={styles.shareLabel}>
+                  WhatsApp
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={handleShare}
+                  style={styles.shareCard}
+              >
+                <Ionicons
+                    name="logo-discord"
+                    size={28}
+                    color="#5865F2"
+                />
+
+                <Text style={styles.shareLabel}>
+                  Discord
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={handleShare}
+                  style={styles.shareCard}
+              >
+                <Ionicons
+                    name="share-social-outline"
+                    size={28}
+                    color="#fff"
+                />
+
+                <Text style={styles.shareLabel}>
+                  More
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => router.back()}
+                style={styles.backButton}
+            >
+              <Ionicons
+                  name="arrow-back"
+                  size={20}
+                  color="#aaa"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                activeOpacity={0.85}
+                disabled={loading}
+                onPress={completeSetup}
+                style={styles.continueButton}
+            >
+              {loading ? (
+                  <ActivityIndicator
+                      color="#000"
+                  />
+              ) : (
+                  <>
+                    <Text
+                        style={styles.continueText}
+                    >
+                      Finish Setup
+                    </Text>
+
+                    <Ionicons
+                        name="checkmark"
+                        size={18}
+                        color="#000"
+                    />
+                  </>
+              )}
+            </TouchableOpacity>
           </View>
         </View>
+      </LinearBackgroundProvider>
+  );
+};
 
-        <View style={styles.divider} />
-
-        {/*/!* Collaborators *!/*/}
-        {/*{isLoading && (*/}
-        {/*  <Text style={styles.muted}>Loading collaborators…</Text>*/}
-        {/*)}*/}
-
-        {/*{error && (*/}
-        {/*  <Text style={styles.error}>{error.message}</Text>*/}
-        {/*)}*/}
-
-        {/*{!isLoading && collaborators?.length === 0 && (*/}
-        {/*  <Text style={styles.muted}>No collaborators</Text>*/}
-        {/*)}*/}
-
-        {/*{collaborators?.map(c => (*/}
-        {/*  <View key={c.id} style={styles.memberRow}>*/}
-        {/*    <Image*/}
-        {/*      source={{ uri: c.avatar_url }}*/}
-        {/*      style={styles.avatarSmall}*/}
-        {/*    />*/}
-        {/*    <View>*/}
-        {/*      <Text style={styles.memberName}>{c.login}</Text>*/}
-        {/*      <Text style={styles.memberRole}>Collaborator</Text>*/}
-        {/*    </View>*/}
-        {/*  </View>*/}
-        {/*))}*/}
-      </View>
-
-      {/* CompleteSetup Setup */}
-      <TouchableOpacity
-        style={styles.cta}
-        onPress={async () => {
-
-          try {
-            setSettingUp(true);
-
-
-            let thumbnail: string | undefined;
-
-            if (data.thumbnailUrl) {
-              const buffer = await uriToArrayBuffer(data.thumbnailUrl);
-
-              const fileName =
-                data.thumbnailUrl.split("/").pop() ?? "thumbnail.png";
-
-              const result = await uploadThumbnial({
-                fileName,
-                contentType: getContentType(data.thumbnailUrl),
-                fileData: buffer,
-              });
-              console.log("The images is uploaded: ", result.url)
-
-              thumbnail = result.url
-            }
-
-
-            const repoId = await createRepo({
-              name: data.selctedrepo?.name!,
-              owner: data.selctedrepo?.ownerLogin!,
-              fullName: data.selctedrepo?.full_name!,
-              url: data.selctedrepo?.html_url!,
-              githubId: BigInt(data.selctedrepo?.id!),
-            })
-
-            const projectId = await createProject({
-              thumbnailUrl: thumbnail,
-              projectName: data.selctedrepo?.name!,
-              description: data.projectdescription,
-              tags: data.tags,
-              isPublic: data.isPublic,
-              repoName: data.selctedrepo?.name!,
-              repoFullName: data.selctedrepo?.full_name!,
-              repoOwner: data.selctedrepo?.ownerLogin!,
-              repoUrl: data.selctedrepo?.html_url!,
-              repositoryId: repoId.repositoryId,
-            })
-
-            await updateUser({
-              occupation: data.occupation,
-              phoneNumber: data.phoneNumber,
-              countryCode: data.countryCode,
-              onboardingCompleted: true,
-            });
-
-          } catch (err) {
-            console.log("Error in saving the data: ", err)
-            Alert.alert("Error", "Failed to save project")
-          }
-          finally {
-            setSettingUp(false);
-          }
-
-        }}
-      >
-        <Text style={styles.ctaText}>Complete setup</Text>
-        <Ionicons name="arrow-forward" size={18} color="black" />
-      </TouchableOpacity>
-
-
-    </View>
-      {settingUp && (
-        <View style={styles.LoadingForeGround}>
-          <ActivityIndicator size={"large"} color={"white"} />
-          <Text style={styles.LoadingText}>Setting up your project...</Text>
-        </View>
-      )}
-</LinearBackgroundProvider>
-
-  )
-}
-
-export default Invite
-
-
+export default Invite;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
 
-  header: {
-    height: 56,
-    justifyContent: "center",
+  progressWrapper: {
+    flexDirection: "row",
+    alignSelf: "center",
+    alignItems: "center",
+    marginBottom: 40,
+  },
+
+  progressItem: {
+    flexDirection: "row",
     alignItems: "center",
   },
 
-  backBtn: {
-    position: "absolute",
-    left: 0,
-    padding: 8,
+  progressCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "#444",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.03)",
   },
 
-  skipBtn: {
-    position: "absolute",
-    right: 0,
-    padding: 8,
+  progressCircleActive: {
+    backgroundColor: "white",
+    borderColor: "white",
   },
 
-  skipText: {
-    color: "#9CA3AF",
-    fontSize: 14,
+  progressText: {
+    color: "#777",
+    fontSize: 13,
+    fontWeight: "600",
   },
 
-  headerText: {
-    fontSize: 24,
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center"
+  progressTextActive: {
+    color: "black",
   },
 
-  titleBlock: {
-    marginTop: 16,
-    marginBottom: 24,
+  progressLine: {
+    width: 28,
+    height: 1,
+    backgroundColor: "#444",
+    marginHorizontal: 6,
+  },
+
+  progressLineActive: {
+    backgroundColor: "white",
+  },
+
+  header: {
+    marginBottom: 36,
+  },
+
+  emoji: {
+    fontSize: 36,
+    marginBottom: 14,
   },
 
   title: {
     color: "white",
-    fontSize: 28,
-    fontWeight: "600",
+    fontSize: 34,
+    fontWeight: "700",
+    lineHeight: 42,
   },
 
   subtitle: {
-    color: "#8B8B8B",
+    color: "#9B9B9B",
     fontSize: 15,
-    marginTop: 6,
-    maxWidth: 300,
+    lineHeight: 24,
+    marginTop: 12,
   },
 
-  inviteRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 32,
+  section: {
+    marginBottom: 28,
   },
 
-  inviteInput: {
-    flex: 1,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#222",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+  label: {
     color: "white",
-  },
-
-  inviteBtn: {
-    backgroundColor: "#2A2A2A",
-    borderRadius: 16,
-    paddingHorizontal: 18,
-    justifyContent: "center",
-  },
-
-  inviteText: {
-    color: "white",
-    fontWeight: "500",
-  },
-
-  membersBlock: {
-    flex: 1,
-  },
-
-  membersTitle: {
-    color: "white",
-    fontSize: 22,
+    fontSize: 15,
     fontWeight: "600",
-    marginBottom: 16,
+    marginBottom: 10,
   },
 
-  memberRow: {
+  linkBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
-    paddingVertical: 10,
-  },
-
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
-
-  avatarSmall: {
-    width: 40,
-    height: 40,
+    backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+    padding: 8,
   },
 
-  memberName: {
+  linkInput: {
+    flex: 1,
     color: "white",
-    fontSize: 15,
+    paddingHorizontal: 14,
+    fontSize: 13,
   },
 
-  memberRole: {
-    color: "#8B8B8B",
-    fontSize: 12,
-    marginTop: 2,
+  copyButton: {
+    height: 46,
+    paddingHorizontal: 18,
+    borderRadius: 14,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
+  },
+
+  copyText: {
+    color: "black",
+    fontWeight: "600",
+  },
+
+  shareSection: {
+    marginTop: 10,
+  },
+
+  shareDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 24,
   },
 
   divider: {
+    flex: 1,
     height: 1,
     backgroundColor: "#222",
-    marginVertical: 12,
   },
 
-  muted: {
-    color: "#777",
-    marginTop: 8,
+  shareText: {
+    color: "#999",
+    fontSize: 13,
   },
 
-  error: {
-    color: "#EF4444",
-    marginTop: 8,
-  },
-
-  cta: {
-    position: "absolute",
-    bottom: 16,
-    left: 16,
-    right: 16,
-    backgroundColor: "white",
-    borderRadius: 20,
-    paddingVertical: 16,
+  shareRow: {
     flexDirection: "row",
+    gap: 12,
+  },
+
+  shareCard: {
+    flex: 1,
+    height: 110,
+    borderRadius: 24,
     justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+
+  shareLabel: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  footer: {
+    marginTop: "auto",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: 28,
+    paddingTop: 16,
+  },
+
+  backButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+
+  continueButton: {
+    height: 54,
+    borderRadius: 18,
+    paddingHorizontal: 22,
+    backgroundColor: "white",
+    flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
 
-  ctaText: {
+  continueText: {
     color: "black",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: "700",
   },
-
-  LoadingForeGround: {
-    backgroundColor: "rgba(0,0,0,0.6)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 100,
-  },
-
-  LoadingText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 16,
-  }
 });

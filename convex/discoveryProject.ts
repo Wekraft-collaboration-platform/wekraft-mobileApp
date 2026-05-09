@@ -23,8 +23,8 @@ export const fetchDefaultDiscoverProject = query({
 
         const user = await ctx.db
             .query("users")
-            .withIndex("by_clerkId", (q) =>
-                q.eq("clerkId", identity.subject)
+            .withIndex("by_token", (q) =>
+                q.eq("clerkToken", identity.subject)
             )
             .first();
 

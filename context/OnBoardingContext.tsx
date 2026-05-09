@@ -4,15 +4,19 @@ import React, { createContext, ReactNode, useContext, useState } from "react"
 type onboardingProp = {
 
     occupation: string
+    goals: string[]
     phoneNumber: string
     countryCode: string
     tags: string[]
+    projectStage : string
     isPublic: boolean
     thumbnailUrl: string | undefined
     projectName: string
     projectdescription: string
     repos: GithubRepo[]
-    selctedrepo: GithubRepo | null
+    selctedrepo: GithubRepo | null,
+    username: string,
+
 
 
 }
@@ -30,6 +34,9 @@ const OnBoradingContext = createContext<onboardingContextType | null>(null)
 export function OnBoardingProvider({ children }: { children: ReactNode }) {
     const [data, setData] = useState<onboardingProp>({
         occupation: "",
+        goals:[],
+        username : "",
+        projectStage: "",
         phoneNumber: "",
         countryCode: "",
         tags: [],

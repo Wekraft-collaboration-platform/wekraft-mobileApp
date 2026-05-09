@@ -59,8 +59,8 @@ export const store = mutation({
     // Find user by tokenIdentifier
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerkId", (q) =>
-        q.eq("clerkId", identity.subject)
+      .withIndex("by_token", (q) =>
+        q.eq("clerkToken", identity.subject)
       )
       .unique();
 
@@ -83,22 +83,20 @@ export const store = mutation({
     // Create new user
     return await ctx.db.insert("users", {
       name: identity.name ?? "Anonymous",
-      clerkId: identity.subject,
+      clerkToken: identity.subject,
       email: identity.email ?? "",
-      imageUrl: identity.pictureUrl ?? undefined,
+      avatarUrl: identity.pictureUrl ?? undefined,
 
       hasCompletedOnboarding: false,
 
       githubUsername: identity.nickname ?? undefined,
       github: `https://github.com/${identity.nickname}`,
-      githubAccessToken: undefined, // will be set later after OAuth
       last_sign_in:
         typeof identity.user_last_sign_in === "number"
           ? identity.user_last_sign_in
           : undefined,
-      inviteLink: undefined,
       // DEFAULT PLAN
-      type: "free",
+      accountType: "free",
       limit: 2,
 
       createdAt: Date.now(),
@@ -129,9 +127,9 @@ export const getCurrentUser = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerkId", (q) =>
-        q.eq("clerkId", identity.subject)
-      )
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.subject)
+        )
       .unique();
 
     return user ?? null;
@@ -178,8 +176,8 @@ export const completeOnboarding = mutation({
 
     const user = await ctx.db
         .query("users")
-        .withIndex("by_clerkId", (q) =>
-            q.eq("clerkId", identity.subject)
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.subject)
         )
         .unique();
 
@@ -210,7 +208,8 @@ export const updateUser = mutation({
     linkedin: v.optional(v.string()),
     website: v.optional(v.string()),
     github: v.optional(v.string()),
-
+    name:v.optional(v.string()),
+    primaryUsage: v.optional(v.array(v.string())),
 
   },
 
@@ -225,8 +224,8 @@ export const updateUser = mutation({
 
     const user = await ctx.db
         .query("users")
-        .withIndex("by_clerkId", (q) =>
-            q.eq("clerkId", identity.subject)
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.subject)
         )
         .unique();
 
@@ -247,6 +246,9 @@ export const updateUser = mutation({
       updates.hasCompletedOnboarding = args.onboardingCompleted
 
     if(args.techStack !== undefined) updates.techStack = args.techStack
+    if(args.name !== undefined) updates.name = args.name
+    if(args.primaryUsage !== undefined) updates.primaryUsage = args.primaryUsage
+
 
     if(args.github !== undefined) updates.github = args.github
     if(args.linkedin !== undefined) updates.linkedin = args.linkedin

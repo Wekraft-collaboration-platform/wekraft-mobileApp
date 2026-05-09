@@ -4,30 +4,48 @@ import { v } from "convex/values";
 export default defineSchema({
   // USERS TABLE
   users: defineTable({
-    name: v.string(),
-    clerkId: v.string(), //clerk user ID for auth
-    email: v.string(),
-    imageUrl: v.optional(v.string()),
-    hasCompletedOnboarding: v.boolean(),
-    githubUsername: v.optional(v.string()),
-    githubAccessToken: v.optional(v.string()), // cant store it in db for security reasons.
-    last_sign_in: v.optional(v.number()),
-    inviteLink: v.optional(v.string()),
-    // bio of the user
-    bio: v.optional(v.string()),
+    name: v.optional(v.string()), // unique
     occupation:v.optional(v.string()),
-    phoneNumber:v.optional(v.string()),
-    countryCode:v.optional(v.string()),
+    clerkToken: v.string(), //clerk user ID for auth
+    email: v.string(),
+    githubUsername: v.optional(v.string()),
+    avatarUrl: v.optional(v.string()),
+    last_sign_in: v.optional(v.number()),
+    // ✅ PLAN TYPE
+    accountType: v.union(
+        v.literal("free"),
+        v.literal("plus"),
+        v.literal("pro"),
+    ),
+    skills: v.optional(v.array(v.string())),
+    lastUpdatedSkillsAt: v.optional(v.number()),
+
+    hasCompletedOnboarding: v.boolean(),
+    primaryUsage: v.optional(v.array(v.string())),
+
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    planExpiry: v.optional(v.number()), // For temporary upgrades/coupons
+
+    bio: v.optional(v.string()),
+    socialLinks: v.optional(v.array(v.string())), // max 3 links (excluding github)
+
+
+
+    // // githubAccessToken: v.optional(v.string()), // cant store it in db for security reasons.
+    // inviteLink: v.optional(v.string()),
+    // // bio of the user
+    // phoneNumber:v.optional(v.string()),
+    // countryCode:v.optional(v.string()),
 
     impactScore : v.optional(v.number()),
-    // GithubInfo 
+    // GithubInfo
     commits:v.optional(v.number()),
     stars:v.optional(v.number()),
     forks:v.optional(v.number()),
     pr: v.optional(v.number()),
     issues: v.optional(v.number()),
 
-    techStack: v.optional(v.array(v.string())),
 
     featuredProjectIds: v.optional(v.array(v.id("projects"))),
 
@@ -36,18 +54,17 @@ export default defineSchema({
     website: v.optional(v.string()),
     github: v.optional(v.string()),
 
-    
-    // ✅ PLAN TYPE
-    type: v.union(v.literal("free"), v.literal("pro"), v.literal("elite")),
+
 
 
     // ✅ PROJECT LIMIT
     limit: v.union(v.literal(2), v.literal(5), v.literal(15)),
 
-    createdAt: v.number(),
-    updatedAt: v.number(),
+
     //   INDEXES.....
-  }).index("by_clerkId", ["clerkId"]),
+  }) .index("by_token", ["clerkToken"])
+      .index("by_accountType", ["accountType"])
+      .index("by_name", ["name"]),
 
 
 
