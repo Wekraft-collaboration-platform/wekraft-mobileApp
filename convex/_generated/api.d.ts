@@ -29,6 +29,7 @@ import type * as projects from "../projects.js";
 import type * as redisClient from "../redisClient.js";
 import type * as repos from "../repos.js";
 import type * as users from "../users.js";
+import type * as workspace from "../workspace.js";
 
 import type {
   ApiFromModules,
@@ -58,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   redisClient: typeof redisClient;
   repos: typeof repos;
   users: typeof users;
+  workspace: typeof workspace;
 }>;
 
 /**

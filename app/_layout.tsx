@@ -12,8 +12,17 @@ import { setAuthTransitionState } from "@/queries/auth/useAuthTransition";
 import { useQueryClient } from "@tanstack/react-query";
 import { PaperProvider } from "react-native-paper";
 import "react-native-get-random-values"
+import {
+  GestureHandlerRootView
+} from 'react-native-gesture-handler'
+
+
 export default function RootLayout() {
   return (
+      <GestureHandlerRootView
+          style={{ flex: 1 }}
+      >
+
     <ClerkAndConvexProvider>
       <QueryClientProvider client={queryClient}>
         <PaperProvider>
@@ -23,6 +32,8 @@ export default function RootLayout() {
         </PaperProvider>
       </QueryClientProvider>
     </ClerkAndConvexProvider>
+      </GestureHandlerRootView>
+
   )
 }
 
@@ -61,18 +72,18 @@ function AuthGate() {
     })
   }, [isLoaded, isSignedIn, user])
 
-  const inLandingGroup = segments[0] === "(landing)";
+  // const inLandingGroup = segments[0] === "(landing)";
 
   // On first load, if we aren't in the landing group, go there.
-  if (!reachedLanding && !inLandingGroup) {
-    return <Redirect href={"/(landing)" as any} />
-  }
+  // if (!reachedLanding && !inLandingGroup) {
+  //   return <Redirect href={"/(landing)" as any} />
+  // }
 
   // Once we've hit the landing group, we stop redirects.
-  if (inLandingGroup) {
-    if (!reachedLanding) setReachedLanding(true); // Persist that we reached it
-    return null;
-  }
+  // if (inLandingGroup) {
+  //   if (!reachedLanding) setReachedLanding(true); // Persist that we reached it
+  //   return null;
+  // }
 
   // Rest of auth logic only happens once we are NOT in (landing) group
   if (!isLoaded) return null

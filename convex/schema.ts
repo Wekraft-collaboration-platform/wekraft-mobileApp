@@ -131,7 +131,7 @@ export default defineSchema({
     //   v.array(
     //     v.object({
     //       role: v.string(),
-    //       type: v.union(
+    //       type.ts: v.union(
     //         v.literal("casual"),
     //         v.literal("part-time"),
     //         v.literal("serious")
@@ -237,6 +237,252 @@ export default defineSchema({
       .index("by_project", ["projectId"])
       .index("by_user", ["userId"])
       .index("by_access_role", ["AccessRole"]),
+
+
+
+
+  // ------------------------------------------------------------
+  tasks: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    type: v.optional(v.object({ label: v.string(), color: v.string() })), // Custom tag like {label: "dashboard", color: "blue"}
+    priority: v.optional(
+        v.union(v.literal("high"), v.literal("medium"), v.literal("low")),
+    ),
+    status: v.union(
+        v.literal("not started"),
+        v.literal("inprogress"),
+        v.literal("reviewing"),
+        v.literal("testing"),
+        v.literal("completed"),
+    ),
+    estimation: v.object({
+      startDate: v.number(),
+      endDate: v.number(),
+    }),
+    isBlocked: v.optional(v.boolean()), // due to this task is marked as issue and cannot be marked as completed !!
+    linkWithCodebase: v.optional(v.string()),
+    projectId: v.id("projects"),
+    createdByUserId: v.id("users"),
+
+    sprintId: v.optional(v.id("sprints")),
+    attachments: v.optional(
+        v.array(
+            v.object({
+              name: v.string(),
+              url: v.string(),
+            })
+        )
+    ),
+    // Insights
+    finalCompletedAt: v.optional(v.number()), // date when finally its marked as completed.
+    finalCompletedBy: v.optional(v.id("users")), // id of that user
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+      .index("by_project", ["projectId"])
+      .index("by_creator", ["createdByUserId"])
+      .index("by_status", ["status"])
+      .index("by_priority", ["priority"])
+      .index("by_project_status", ["projectId", "status"])
+      .index("by_sprint", ["sprintId"]),
+
+  // --------------------------------------------------
+  taskComments: defineTable({
+    taskId: v.id("tasks"),
+    userId: v.id("users"),
+    userName: v.string(),
+    userImage: v.optional(v.string()),
+    comment: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+      .index("by_task", ["taskId"])
+      .index("by_user", ["userId"])
+      .index("by_task_user", ["taskId", "userId"]),
+  // ----------------------------------------------------
+
+  issues: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    fileLinked: v.optional(v.string()),
+    environment: v.optional(
+        v.union(
+            v.literal("local"),
+            v.literal("dev"),
+            v.literal("staging"),
+            v.literal("production"),
+        ),
+    ),
+    severity: v.optional(
+        v.union(v.literal("critical"), v.literal("medium"), v.literal("low")),
+    ),
+    due_date: v.optional(v.number()), // for tracking
+    status: v.union(
+        v.literal("not opened"),
+        v.literal("opened"),
+        v.literal("reopened"),
+        v.literal("closed"),
+    ),
+    type: v.union(
+        v.literal("manual"),
+        v.literal("task-issue"),
+        v.literal("github"),
+    ),
+    githubIssueUrl: v.optional(v.string()), // if its from github.
+    taskId: v.optional(v.id("tasks")), // if its from task.
+    projectId: v.id("projects"),
+    createdByUserId: v.id("users"),
+    sprintId: v.optional(v.id("sprints")), // exluded closed issues
+    // Insights
+    finalCompletedAt: v.optional(v.number()),
+    finalCompletedBy: v.optional(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+      .index("by_project", ["projectId"])
+      .index("by_creator", ["createdByUserId"])
+      .index("by_task", ["taskId"])
+      .index("by_status", ["status"])
+      .index("by_severity", ["severity"])
+      .index("by_environment", ["environment"])
+      .index("by_sprint", ["sprintId"]),
+  // ---------------------------------------------------
+  issueComments: defineTable({
+    issueId: v.id("issues"),
+    userId: v.id("users"),
+    userName: v.string(),
+    userImage: v.optional(v.string()),
+    comment: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+      .index("by_issue", ["issueId"])
+      .index("by_user", ["userId"])
+      .index("by_issue_user", ["issueId", "userId"]),
+
+  // -----------------------------------------------------
+  projectDetails: defineTable({
+    projectId: v.id("projects"),
+    repoId: v.optional(v.id("repositories")), // optional if project has connected repo.
+    targetDate: v.optional(v.number()),
+    // healthscore to:do
+  })
+      .index("by_project", ["projectId"])
+      .index("by_repo", ["repoId"]),
+
+  // ----------------------------------------------------
+  calendarEvents: defineTable({
+    projectId: v.id("projects"),
+    creatorId: v.id("users"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    type: v.union(v.literal("event"), v.literal("milestone")),
+    start: v.number(),
+    end: v.number(),
+    allDay: v.boolean(),
+    color: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+      .index("by_project", ["projectId"])
+      .index("by_creator", ["creatorId"]),
+
+  // --------------------------------------------------------
+  sprints: defineTable({
+    projectId: v.id("projects"),
+    creatorId: v.id("users"),
+    duration: v.object({
+      startDate: v.number(),
+      endDate: v.number(),
+    }),
+    sprintName: v.string(),
+    sprintGoal: v.string(),
+    status: v.union(
+        v.literal("planned"),
+        v.literal("active"),
+        v.literal("completed"),
+    ),
+    taskIds: v.optional(v.array(v.id("tasks"))), // to track history of tasks added to this sprint
+    issueIds: v.optional(v.array(v.id("issues"))), // to track history of issues added to this sprint
+    finalStats: v.optional(
+        v.object({
+          completedTasks: v.number(),
+          totalTasks: v.number(),
+          closedIssues: v.number(),
+          totalIssues: v.number(),
+        }),
+    ), // store current stats of sprint when sprint is marked as completed
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+      .index("by_project", ["projectId"])
+      .index("by_creator", ["creatorId"])
+      .index("by_status", ["status"])
+      .index("by_project_status", ["projectId", "status"]),
+
+  // -------------------------------------------------------
+  // For each project only 1 scheduler. User can make it active , update or delete.
+  schedulers: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    frequencyDays: v.number(), // min 3 days
+    recipientEmail: v.string(),
+    isActive: v.boolean(), // default false , only true by kaya or team
+    lastRunAt: v.optional(v.number()), // timestamp (Unix ms)
+    nextRunAt: v.number(),
+    isRunning: v.optional(v.boolean()), // default false , only true when its scheduler is running.
+    lastRunStatus: v.optional(
+        v.union(v.literal("success"), v.literal("failure")),
+    ), // success or failure
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+      .index("by_project", ["projectId", "isActive", "nextRunAt"])
+      .index("by_nextRun", ["isActive", "nextRunAt"]),
+
+  // -------------------------------------------------
+  tickets: defineTable({
+    projectId: v.id("projects"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    createdBy: v.id("users"),
+    assignedTo: v.id("users"),
+    status: v.union(v.literal("open"), v.literal("closed")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+      .index("by_project", ["projectId"])
+      .index("by_creator", ["createdBy"])
+      .index("by_assignee", ["assignedTo"])
+      .index("by_status", ["status"]),
+
+  // -------------------------------------------------
+  // Scalable Join Tables for Assignees
+  taskAssignees: defineTable({
+    taskId: v.id("tasks"),
+    userId: v.id("users"),
+    name: v.string(), // Denormalized for fast list rendering
+    avatar: v.optional(v.string()), // Denormalized for fast list rendering
+    projectId: v.id("projects"), // To optimize fetching all assignees for a project
+  })
+      .index("by_task", ["taskId"])
+      .index("by_user", ["userId"])
+      .index("by_project", ["projectId"])
+      .index("by_task_user", ["taskId", "userId"]),
+
+  issueAssignees: defineTable({
+    issueId: v.id("issues"),
+    userId: v.id("users"),
+    name: v.string(),
+    avatar: v.optional(v.string()),
+    projectId: v.id("projects"),
+  })
+      .index("by_issue", ["issueId"])
+      .index("by_user", ["userId"])
+      .index("by_project", ["projectId"])
+      .index("by_issue_user", ["issueId", "userId"]),
 
 });
 

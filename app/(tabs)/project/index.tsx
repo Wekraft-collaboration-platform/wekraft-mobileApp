@@ -11,11 +11,12 @@ import DeleteProjectAlertDialog from "@/components/Dialogs/DeleteProjectAlertDia
 import Toast from "react-native-toast-message";
 import PlanUpgradeDialog from "@/components/Dialogs/PlanUpgradeDialog";
 import ProjectsSkeletonView from "@/components/SkeletonLayout/ProjectsSkeletonView";
+import {getUserProjects} from "@/convex/projects";
 
 const Project = () => {
 
     const user = useQuery(api.users.getCurrentUser)
-    const Projects = useQuery(api.projects.getProjects)
+    const Projects = useQuery(api.projects.getUserProjects)
     const [projectOptionsVisible, setProjectOptionsVisible] = useState<boolean>(false)
     const [selectedProject, setSelectedProject] = useState<any>("");
     const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -25,6 +26,8 @@ const Project = () => {
     const [deleteLoading, setDeleteLoading] = useState(false)
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
+
+    console.log("Project : ",Projects)
 
 
     const handleDelete = async () => {
@@ -151,7 +154,14 @@ const Project = () => {
                         <ProjectCard
                             item={item}
                             onPress={()=>{
-                               router.push(`/project/${item._id}`)
+                            //     router.push(
+                            //         pathname :`/project/workspace/${item.slug}`,
+                            // )
+                                router.push({
+                                    pathname :`/project/workspace/${item.slug}`,
+                                    params: { slug: item.slug },
+                                })
+
                             }}
                             onLongPress={()=>{
                                 setSelectedProject(item);
@@ -178,7 +188,7 @@ const Project = () => {
                     console.log("user Data : ",user?.limit)
                     // if(Projects.length >= user?.limit || 0){
                         // Toast.show({
-                        //   type: "error",
+                        //   type.ts: "error",
                         //   visibilityTime: 2000,
                         //   position: "bottom",
                         //   text1: "Limit Exceeded",

@@ -33,7 +33,7 @@ export type UserData = {
   website?: string
   github?: string
 
-  // Plan type
+  // Plan type.ts
   type: "free" | "pro" | "elite"
 
   // Project limit

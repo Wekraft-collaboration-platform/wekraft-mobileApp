@@ -332,7 +332,7 @@ export const RedisGetProjectHealthData = action({
 
             velocityDelta,
 
-            // FIX: match type
+            // FIX: match type.ts
             velocityTrend: isFreshRepo
                 ? "stable"
                 : velocityDelta >= 2

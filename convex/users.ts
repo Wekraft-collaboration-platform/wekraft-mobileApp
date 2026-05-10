@@ -60,7 +60,7 @@ export const store = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("clerkToken", identity.subject)
+        q.eq("clerkToken", identity.tokenIdentifier)
       )
       .unique();
 
@@ -128,7 +128,7 @@ export const getCurrentUser = query({
     const user = await ctx.db
       .query("users")
         .withIndex("by_token", (q) =>
-            q.eq("clerkToken", identity.subject)
+            q.eq("clerkToken", identity.tokenIdentifier)
         )
       .unique();
 
@@ -194,7 +194,7 @@ export const updateUser = mutation({
     const user = await ctx.db
         .query("users")
         .withIndex("by_token", (q) =>
-            q.eq("clerkToken", identity.subject)
+            q.eq("clerkToken", identity.tokenIdentifier)
         )
         .unique();
 

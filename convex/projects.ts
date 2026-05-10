@@ -21,7 +21,7 @@ import {getPlanLimits} from "./pricing";
 //         v.array(
 //             v.object({
 //               role: v.string(),
-//               type: v.union(
+//               type.ts: v.union(
 //                   v.literal("casual"),
 //                   v.literal("part-time"),
 //                   v.literal("serious")
@@ -405,6 +405,149 @@ export const getProjects = query({
   },
 });
 
+export const getProjectBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const project = await ctx.db
+        .query("projects")
+        .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+        .unique();
+    if (!project) return null;
+
+    const identity = await ctx.auth.getUserIdentity();
+    const user = identity
+        ? await ctx.db
+            .query("users")
+            .withIndex("by_token", (q) =>
+                q.eq("clerkToken", identity.tokenIdentifier),
+            )
+            .unique()
+        : null;
+
+    const owner = await ctx.db.get(project.ownerId);
+    const ownerClerkId = owner?.clerkToken.split("|").pop();
+
+    const projectWithOwner = {
+      ...project,
+      ownerClerkId,
+    };
+
+    // Security: Only return if public OR user is the owner OR user is a member
+    if (project.isPublic || (user && project.ownerId === user._id)) {
+      return projectWithOwner;
+    }
+
+    if (user) {
+      const membership = await ctx.db
+          .query("projectMembers")
+          .withIndex("by_project", (q) => q.eq("projectId", project._id))
+          .filter((q) => q.eq(q.field("userId"), user._id))
+          .unique();
+
+      if (membership) return projectWithOwner;
+    }
+
+    return null;
+  },
+});
+
+export const getProjectMembers = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) return [];
+
+    const members = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+        .collect();
+
+    // Ensure the owner is in the list (synthesize if missing)
+    const hasOwner = members.some((m) => m.userId === project.ownerId);
+    if (!hasOwner) {
+      // We don't insert here to keep it a pure query, but we include it in the results
+      const ownerUser = await ctx.db.get(project.ownerId);
+      if (ownerUser) {
+        members.push({
+          projectId: project._id,
+          userId: project.ownerId,
+          userName: ownerUser.name || "Owner",
+          userImage: ownerUser.avatarUrl,
+          AccessRole: "owner",
+          joinedAt: project.createdAt,
+        } as any);
+      }
+    }
+
+    return await Promise.all(
+        members.map(async (m) => {
+          const user = await ctx.db.get(m.userId);
+          return {
+            ...m,
+            userName: user?.name || m.userName || "Anonymous",
+            userImage: user?.avatarUrl || m.userImage || "",
+            AccessRole:
+                m.AccessRole ||
+                (m as any).role ||
+                (m.userId === project.ownerId ? "owner" : "member"),
+            clerkUserId: user?.clerkToken?.split("|").pop() ?? null,
+          };
+        }),
+    );
+  },
+});
+
+
+
+export const getUserProjects = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const user = await ctx.db
+        .query("users")
+        .withIndex("by_token", (q) =>
+            q.eq("clerkToken", identity.tokenIdentifier),
+        )
+        .unique();
+
+    if (!user) return [];
+
+    const projects = await ctx.db
+        .query("projects")
+        .withIndex("by_owner", (q) => q.eq("ownerId", user._id))
+        .collect();
+
+    const projectsWithMembers = await Promise.all(
+        projects.map(async (p) => {
+          const members = await ctx.db
+              .query("projectMembers")
+              .withIndex("by_project", (q) => q.eq("projectId", p._id))
+              .collect();
+
+          return {
+            _id: p._id,
+            projectName: p.projectName,
+            isPublic: p.isPublic,
+            thumbnailUrl: p.thumbnailUrl,
+            repoId: p.repositoryId,
+            repoName: p.repoName,
+            projectWorkStatus: p.projectWorkStatus,
+            slug: p.slug,
+            members: members.slice(0, 4).map((m) => ({
+              userId: m.userId,
+              userImage: m.userImage,
+              userName: m.userName,
+            })),
+            totalMembers: members.length,
+          };
+        }),
+    );
+
+    return projectsWithMembers;
+  },
+});
 
 // =================================
 // GET PROJECT BY ID
