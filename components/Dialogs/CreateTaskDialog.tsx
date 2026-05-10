@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react"
+import React, {useEffect, useMemo, useState} from "react"
 
 import {
     View,
@@ -58,10 +58,6 @@ export default function CreateTaskDialog({
         { projectId }
     )
 
-    // members?.map(member => {
-    //     console.log("MEMBER", JSON.stringify(member, null, 2))
-    // })
-
     const [title, setTitle] =
         useState("")
 
@@ -100,6 +96,28 @@ export default function CreateTaskDialog({
 
     const [isPending, setIsPending] =
         useState(false)
+
+    useEffect(() => {
+
+        if (visible) {
+
+            setTitle("")
+            setDescription("")
+            setPriority("none")
+            setStatus("not started")
+            setSelectedTag(null)
+            setSelectedMembers([])
+            setAttachments([])
+            setLinkedCodePath("")
+            setStartDate(new Date())
+            setEndDate(new Date())
+            setShowStartPicker(false)
+            setShowEndPicker(false)
+            setIsPending(false)
+
+        }
+
+    }, [visible])
 
     const pickAttachment = async () => {
 
